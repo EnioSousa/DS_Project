@@ -4,18 +4,38 @@ import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * This class uses hashset to save words. This words can be manually added or
+ * randomly generated.
+ * 
+ * @author enio95
+ *
+ */
 public class Dictionary {
+    /**
+     * Data structure where we save our words
+     */
     private HashSet<String> dic = new HashSet<>();
-
+    /**
+     * Lock used to access our data set.
+     */
     public ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
+    /**
+     * Alphabet set used to generate random words
+     */
     private final String alphaSet = "abcdefghijklmnopqrstuvwxyz";
+    /**
+     * Random generator
+     */
     private final SecureRandom rnd = new SecureRandom();
 
     public Dictionary() {
 	addNewRandomWord(3000);
     }
 
+    /**
+     * Add a single new word to our dictionary
+     */
     public void addNewRandomWord() {
 	new Thread(new Runnable() {
 	    @Override
@@ -31,6 +51,11 @@ public class Dictionary {
 	}).start();
     }
 
+    /**
+     * Add multiple word to our dictionary with an interval between them
+     * 
+     * @param time The interval between new words added
+     */
     public void addNewRandomWord(long time) {
 	new Thread(new Runnable() {
 	    @Override
@@ -55,6 +80,11 @@ public class Dictionary {
 	}).start();
     }
 
+    /**
+     * Add a single word to our dictionary. Method acquires a write lock
+     * 
+     * @param str word to add
+     */
     public void addWord(String str) {
 	lock.writeLock().lock();
 
@@ -65,6 +95,12 @@ public class Dictionary {
 	}
     }
 
+    /**
+     * Checks if our dictionary contains a the given word
+     * 
+     * @param str word to check
+     * @return true if its in the dictionary, otherwise false
+     */
     public boolean containsWord(String str) {
 	lock.readLock().lock();
 
@@ -79,6 +115,12 @@ public class Dictionary {
 	return contains;
     }
 
+    /**
+     * Generate a random word a specific length
+     * 
+     * @param len length of the word
+     * @return a random word
+     */
     public String randomWord(int len) {
 	StringBuilder sb = new StringBuilder(len);
 
@@ -89,6 +131,9 @@ public class Dictionary {
 	return sb.toString();
     }
 
+    /**
+     * Print the current dictionary
+     */
     public void showDic() {
 	lock.readLock().lock();
 
@@ -104,6 +149,11 @@ public class Dictionary {
 	}
     }
 
+    /**
+     * Get the current dictionary
+     * 
+     * @return the data structure that holds the words
+     */
     public HashSet<String> getDic() {
 	return dic;
     }
