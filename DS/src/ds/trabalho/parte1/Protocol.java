@@ -1,7 +1,5 @@
 package ds.trabalho.parte1;
 
-import java.util.Date;
-
 /**
  * Protocol class on how to deal with shell commands and inter-machine messages
  * 
@@ -10,7 +8,7 @@ import java.util.Date;
  */
 public class Protocol {
     /*
-     * Send or Got the token
+     * Send or Get the token
      */
     static final String TOKEN = "PASS_TOKEN";
     /*
@@ -20,15 +18,11 @@ public class Protocol {
     /*
      * Lock token
      */
-    static final String UNLOCK_TOKEN = "UNLOCK";
+    static final String UNLOCK_TOKEN = "unlock()";
     /*
      * Unlock token
      */
-    static final String LOCK_TOKEN = "LOCK";
-    /*
-     * Time of last token received
-     */
-    static Date prevTime = new Date();
+    static final String LOCK_TOKEN = "lock()";
 
     /**
      * Function is responsible for coordinating the action of a command
@@ -50,14 +44,7 @@ public class Protocol {
 	case TOKEN:
 	    Token.getToken(Integer.parseInt(arr[1]));
 
-	    Date curTime = new Date();
-
-	    if (curTime.getTime() - prevTime.getTime() >= 2000) {
-		System.out.println("Current token: " + Token.getTokenValue());
-		prevTime = curTime;
-	    }
-
-	    Protocol.send(Machine.findNextMachine(), Protocol.TOKEN);
+	    System.out.println("Got token: " + Token.getTokenValue());
 	    return;
 
 	default:
@@ -89,8 +76,10 @@ public class Protocol {
 
 	switch (req) {
 	case TOKEN:
-	    Token.passToken(connection);
-
+	    if (Token.passToken(connection)) {
+		System.out.println("Token passed to machine: "
+			+ connection.getMachineId());
+	    }
 	    return;
 
 	case HELLO:
@@ -119,8 +108,7 @@ public class Protocol {
 
 	case LOCK_TOKEN:
 	    Token.setTokenLock(true);
-	    Integer temp = Token.getTokenValue();
-	    System.out.println("Token lock: " + (temp == null ? "none" : temp));
+	    System.out.println("Token locked");
 	    return;
 
 	default:

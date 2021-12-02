@@ -32,9 +32,10 @@ public class Token {
     /**
      * Pass the token
      * 
-     * @param connection A connection with another machine
+     * @param connection connection to pass the token
+     * @return true if the token was passed, otherwise false
      */
-    public static void passToken(Connection connection) {
+    public static boolean passToken(Connection connection) {
 
 	lock.writeLock().lock();
 
@@ -44,6 +45,10 @@ public class Token {
 			Protocol.TOKEN + ":" + String.valueOf(tokenValue + 1));
 
 		Token.tokenOwn = false;
+
+		return true;
+	    } else {
+		return false;
 	    }
 
 	} finally {
@@ -52,7 +57,7 @@ public class Token {
     }
 
     /**
-     * Get a token from another machin
+     * Get a token from another machine
      * 
      * @param value The value of the token
      */

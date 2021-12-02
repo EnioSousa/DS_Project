@@ -52,7 +52,8 @@ public class Connection {
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		System.out.println("Attempt with: " + ip + " " + port);
+		System.out
+			.println("Attempt connection with: " + ip + " " + port);
 
 		boolean tryAgain = true;
 
@@ -62,7 +63,8 @@ public class Connection {
 			    ;
 
 			socket = new Socket(ip, port);
-			System.out.println("Success: " + ip + " " + port);
+			System.out.println("Connection attempt Success: " + ip
+				+ " " + port);
 
 			startThreads();
 			tryAgain = false;
@@ -127,12 +129,14 @@ public class Connection {
      * Close the read and write threads
      */
     public void closeConnection() {
-	if (write != null && write.isAlive()) {
+	if (write != null && !write.isInterrupted()) {
 	    write.closeThread();
+	    write = null;
 	}
 
-	if (read != null && read.isAlive()) {
+	if (read != null && !read.isInterrupted()) {
 	    read.closeThread();
+	    read = null;
 	}
 
 	try {
@@ -168,15 +172,14 @@ public class Connection {
 		closeConnection();
 	    }
 
-	    String temp = "YOLO";
 	    // Read from channel
-	    while (!socket.isClosed() && !socket.isInputShutdown() && in != null
-		    && temp != null) {
+	    while (socket != null && !socket.isClosed()
+		    && !socket.isInputShutdown() && in != null) {
 		try {
 		    Protocol.receive(connection, in.readLine());
 		} catch (IOException e) {
-		    e.printStackTrace();
-		    closeConnection();
+		    if (read != null)
+			closeConnection();
 		}
 	    }
 
@@ -189,9 +192,11 @@ public class Connection {
 	private void closeThread() {
 	    try {
 		in.close();
+		in = null;
 	    } catch (IOException e) {
 		e.printStackTrace();
 	    } finally {
+		System.out.println("Closed read thread");
 		Thread.currentThread().interrupt();
 	    }
 
@@ -234,6 +239,8 @@ public class Connection {
 
 	private void closeThread() {
 	    out.close();
+	    out = null;
+	    System.out.println("Closed write thread");
 	    Thread.currentThread().interrupt();
 	}
     }

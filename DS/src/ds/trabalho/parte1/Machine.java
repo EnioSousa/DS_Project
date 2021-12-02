@@ -23,7 +23,7 @@ public class Machine {
     /*
      * Number of total machines in the token ring
      */
-    private static final int totalMachines = 3;
+    private static final int totalMachines = 6;
     /*
      * Listening port for new connections
      */
@@ -43,15 +43,24 @@ public class Machine {
     /*
      * Thread responsible for reading commands from the user
      */
-    private Shell shell;
+    private Thread shell;
+    /**
+     * Thread is responsible for starting the process of sending the token to
+     * another machine
+     */
+    private Thread scheduleTokenPass;
+    /*
+     * Time to wait before we trying to send the token to another machine
+     */
+    private long waitTime = 2000;
     /*
      * Token thats used to set whose machine turn is it
      */
     Token token;
 
     /*
-     * Constructor is reponsible for initializing the most basic stuff a machine
-     * needs
+     * Constructor is responsible for initialising the most basic stuff a
+     * machine needs
      * 
      * @param id Machine ID
      * 
@@ -63,16 +72,65 @@ public class Machine {
 	this.listenPort = listenPort;
 
 	if (id == 0) {
-	    token = new Token(true, true, 0);
+	    token = new Token(true, false, 0);
 	} else {
-	    token = new Token(false, true, null);
+	    token = new Token(false, false, null);
 	}
-
-	shell = new Shell();
-	shell.start();
 
 	listen = new ListenToConnection(this, false);
 	listen.start();
+
+	/**
+	 * Reads commands from stdin
+	 */
+	shell = new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		Scanner in = new Scanner(System.in);
+
+		System.out.println("Command shell started");
+
+		while (in.hasNext()) {
+		    Protocol.doAction(in.nextLine());
+		}
+
+		in.close();
+		stopMachine();
+	    }
+	});
+	shell.start();
+
+	/**
+	 * Responsible for trying to pass the token every second. Without this
+	 * the network use is to high, if every machine doesn't have a lock
+	 */
+	scheduleTokenPass = new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		while (true) {
+		    if (Token.isTokenOwn() && !Token.isTokenLock()) {
+			passToken();
+		    } else {
+			try {
+			    Thread.sleep(waitTime);
+			} catch (InterruptedException e) {
+			    System.err.print("Sleepfailed");
+			}
+		    }
+		}
+	    }
+	});
+	scheduleTokenPass.start();
+    }
+
+    private void stopMachine() {
+	System.out.println("Stoping machine");
+	for (Connection connection : connections) {
+	    connection.closeConnection();
+	}
+
+	scheduleTokenPass.interrupt();
+	System.out.println("Connections closed");
     }
 
     /**
@@ -160,7 +218,8 @@ public class Machine {
 
 	try {
 	    for (Connection connection : connections) {
-		if (connection.getMachineId() == id) {
+		if (connection.getMachineId() != null
+			&& connection.getMachineId() == id) {
 		    return connection;
 		}
 	    }
@@ -171,33 +230,14 @@ public class Machine {
 	return null;
     }
 
+    public void closeProgram() {
+
+    }
+
     /**
      * Function will pass the token, if in its possession, to the next machine.
      */
     public void passToken() {
 	Protocol.send(findNextMachine(), Protocol.TOKEN);
-    }
-
-    /**
-     * Class is responsible for reading commands from STDIN
-     * 
-     * @author enio95
-     *
-     */
-    private class Shell extends Thread {
-	Scanner in;
-
-	Shell() {
-	    System.out.println("Passou");
-	    in = new Scanner(System.in);
-	}
-
-	public void run() {
-	    while (in.hasNext()) {
-		Protocol.doAction(in.nextLine());
-	    }
-
-	    in.close();
-	}
     }
 }

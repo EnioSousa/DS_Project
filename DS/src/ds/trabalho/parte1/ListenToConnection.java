@@ -38,9 +38,10 @@ public class ListenToConnection extends Thread {
     public void run() {
 	try {
 	    this.serverSocket = new ServerSocket(machine.getListenPort());
-	} catch (IOException e) {
+	} catch (Exception e) {
 	    e.printStackTrace();
 	    closeThread();
+	    return;
 	}
 
 	do {
