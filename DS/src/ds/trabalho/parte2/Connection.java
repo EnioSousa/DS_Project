@@ -11,6 +11,12 @@ public class Connection {
     private WriteChannel writeChannel;
     private ReadChannel readChannel;
 
+    /**
+     * 
+     * @param socket
+     * @param myMachineId
+     * @throws Exception
+     */
     public Connection(Socket socket, int myMachineId) throws Exception {
 	this.socket = socket;
 	this.myMachineId = myMachineId;
