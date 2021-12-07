@@ -136,13 +136,10 @@ public class Protocol {
 		return;
 	    }
 
-	    // Check if we have ip or machine number
-	    String[] str = arr[1].split("\\.");
-
-	    if (str.length > 1) {
-		curMachine.push(arr[1]);
+	    if (arr[1].contains("l") || arr[1].contains(".")) {
+		curMachine.pull(arr[1]);
 	    } else {
-		curMachine.push(Integer.parseInt(arr[1]));
+		curMachine.pull(Integer.parseInt(arr[1]));
 	    }
 
 	    return;
@@ -153,10 +150,8 @@ public class Protocol {
 			"Command does not contain ip or machine number");
 		return;
 	    }
-	    // Check if we have ip or machine number
-	    String[] str1 = arr[1].split("\\.");
 
-	    if (str1.length > 1) {
+	    if (arr[1].contains("l") || arr[1].contains(".")) {
 		curMachine.pull(arr[1]);
 	    } else {
 		curMachine.pull(Integer.parseInt(arr[1]));
