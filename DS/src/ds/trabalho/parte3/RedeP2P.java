@@ -4,7 +4,7 @@ public class RedeP2P {
     public static void main(String[] argv) {
 	Integer id = Integer.parseInt(argv[findInArray(argv, "--id") + 1]);
 	Integer port = Integer
-		.parseInt(argv[findInArray(argv, "--portListen") + 1]);
+		.parseInt(argv[findInArray(argv, "--listenPort") + 1]);
 
 	Machine machine = new Machine(id, port);
     }
