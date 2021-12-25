@@ -46,8 +46,10 @@ public class Token {
      * @param connection The connection to the other machine
      */
     static void passToken(Connection connection) {
-	if (connection == null)
+	if (connection == null) {
+	    System.out.println("[ERROR] Token: Connection is null:");
 	    return;
+	}
 
 	lock.writeLock().lock();
 	try {
