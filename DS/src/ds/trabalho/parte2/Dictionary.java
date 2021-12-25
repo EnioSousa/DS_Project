@@ -15,19 +15,19 @@ public class Dictionary {
     /**
      * Data structure where we save our words
      */
-    private HashSet<String> dic = new HashSet<>();
+    private static HashSet<String> dic = new HashSet<>();
     /**
      * Lock used to access our data set.
      */
-    public ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    public static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     /**
      * Alphabet set used to generate random words
      */
-    private final String alphaSet = "abcdefghijklmnopqrstuvwxyz";
+    private static final String alphaSet = "abcdefghijklmnopqrstuvwxyz";
     /**
      * Random generator
      */
-    private final SecureRandom rnd = new SecureRandom();
+    private static final SecureRandom rnd = new SecureRandom();
 
     public Dictionary() {
 	addNewRandomWord(3000);
@@ -36,7 +36,7 @@ public class Dictionary {
     /**
      * Add a single new word to our dictionary
      */
-    public void addNewRandomWord() {
+    public static void addNewRandomWord() {
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
@@ -56,23 +56,30 @@ public class Dictionary {
      * 
      * @param time The interval between new words added
      */
-    public void addNewRandomWord(long time) {
+    public static void addNewRandomWord(long time) {
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
 		String str;
 
 		while (dic != null) {
-		    do {
-			str = randomWord(rnd.nextInt(5) + 5);
-		    } while (containsWord(str));
+		    lock.writeLock().lock();
 
-		    addWord(str);
+		    try {
+			do {
+			    str = randomWord(rnd.nextInt(5) + 5);
+			} while (dic.contains(str));
+
+			dic.add(str);
+		    } finally {
+			lock.writeLock().unlock();
+		    }
 
 		    try {
 			Thread.sleep(time);
 		    } catch (InterruptedException e) {
-			e.printStackTrace();
+			System.out.println(
+				"[ERROR] Dic: Random word add thread stoped: ");
 			return;
 		    }
 		}
@@ -85,7 +92,7 @@ public class Dictionary {
      * 
      * @param str word to add
      */
-    public void addWord(String str) {
+    public static void addWord(String str) {
 	lock.writeLock().lock();
 
 	try {
@@ -101,7 +108,7 @@ public class Dictionary {
      * @param str word to check
      * @return true if its in the dictionary, otherwise false
      */
-    public boolean containsWord(String str) {
+    public static boolean containsWord(String str) {
 	lock.readLock().lock();
 
 	boolean contains;
@@ -121,7 +128,7 @@ public class Dictionary {
      * @param len length of the word
      * @return a random word
      */
-    public String randomWord(int len) {
+    public static String randomWord(int len) {
 	StringBuilder sb = new StringBuilder(len);
 
 	for (int i = 0; i < len; i++) {
@@ -134,17 +141,17 @@ public class Dictionary {
     /**
      * Print the current dictionary
      */
-    public void showDic() {
+    public static void showDic() {
 	lock.readLock().lock();
 
-	System.out.println("DIC START: SIZE:" + dic.size());
+	System.out.println("[INFO] Dic: Dic start: Size: " + dic.size());
 
 	try {
 	    for (String str : dic) {
 		System.out.println(str);
 	    }
 	} finally {
-	    System.out.println("DIC END: SIZE: " + dic.size());
+	    System.out.println("[INFO] Dic: Dic end: Size: " + dic.size());
 	    lock.readLock().unlock();
 	}
     }
@@ -154,7 +161,19 @@ public class Dictionary {
      * 
      * @return the data structure that holds the words
      */
-    public HashSet<String> getDic() {
-	return dic;
+    public static HashSet<String> getDic() {
+	HashSet<String> temp = new HashSet<>();
+
+	lock.readLock().lock();
+
+	try {
+	    for (String word : dic) {
+		temp.add(word);
+	    }
+	} finally {
+	    lock.readLock().unlock();
+	}
+
+	return temp;
     }
 }

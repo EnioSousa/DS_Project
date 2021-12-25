@@ -14,8 +14,8 @@ public class Protocol {
      */
     static final String MSG_REGISTER = "REGISTER";
     static final String MSG_HELLO = "HELLO";
-    static final String MSG_TABLE = "TABLE";
-    static final String MSG_SEND_TABLE = "SEND_TABLE";
+    static final String MSG_TABLE_ENTRY = "TABLE";
+    static final String MSG_REQUEST_TABLE = "SEND_TABLE";
 
     /**
      * Standard commands that we can send to our machine
@@ -26,9 +26,13 @@ public class Protocol {
     static final String CMD_PULL = "pull";
     static final String CMD_PUSH_PULL = "pushpull";
     static final String CMD_SHOW_DIC = "dic";
+    static final String CMD_HELP = "help";
+
+    static final String GOODBYE = "GOODBYE";
+    static final String ACK_GOODBYE = "ACK_GOODBYE";
 
     /**
-     * Identifier
+     * /** Identifier
      */
     static final String FROM = "FROM";
 
@@ -43,30 +47,50 @@ public class Protocol {
      * @param connection The connection that received the message
      * @param message    The message content
      */
-    public static void receive(Connection connection, String message) {
-	if (message == null || connection == null)
+    public static void proccessMessage(Connection connection, String message) {
+	if (message == null || connection == null) {
+	    System.out.println("[ERROR] Protocol: invalid message:");
 	    return;
+	}
 
 	String arr[] = message.split(":");
+	System.out.println("[INFO] Protocol: Got message: " + arr[2]);
 
 	if (arr.length < 3)
-	    System.out.println("Wrong format: [" + message + "]");
+	    System.out.println("[ERROR] Protocol: Wrong format: " + message);
 
 	switch (arr[2]) {
 	case MSG_HELLO:
-	    connection.setOtherMachineId(Integer.parseInt(arr[3]));
-	    System.out.println("Machine " + arr[1] + " says hello");
+	    connection.setOtherMachineId(Integer.parseInt(arr[1]));
 	    return;
 
-	case MSG_TABLE:
-	    curMachine.addWord(arr[3]);
+	case MSG_TABLE_ENTRY:
+	    Dictionary.addWord(arr[3]);
 	    return;
 
-	case MSG_SEND_TABLE:
+	case MSG_REQUEST_TABLE:
+	    System.out.println("[INFO] Protocol: Pull request from: "
+		    + connection.getOtherMachineId());
+
+	    for (String word : Dictionary.getDic()) {
+		Protocol.sendMessage(connection, MSG_TABLE_ENTRY, word);
+	    }
+
+	    return;
+
+	case GOODBYE:
+	    connection.send(ACK_GOODBYE, true);
+	    connection.close();
+	    break;
+
+	case ACK_GOODBYE:
+	    connection.close();
+	    break;
+
+	default:
 	    System.out.println(
-		    "Pull request from: " + connection.getOtherMachineId());
-	    curMachine.push(connection);
-	    return;
+		    "[ERROR] Protocol: unkown message format: " + message);
+	    break;
 	}
     }
 
@@ -78,14 +102,14 @@ public class Protocol {
      * @param msgCode    Standard message codes to talk with other machines
      * @param msgValue   Message value associated with message code
      */
-    public static void send(Connection connection, String msgCode,
+    public static void sendMessage(Connection connection, String msgCode,
 	    String msgValue) {
 
 	switch (msgCode) {
 	case MSG_HELLO:
-	case MSG_TABLE:
-	case MSG_SEND_TABLE:
-	    connection.write(buildMessage(connection, msgCode, msgValue));
+	case MSG_TABLE_ENTRY:
+	case MSG_REQUEST_TABLE:
+	    connection.send(buildMessage(connection, msgCode, msgValue), false);
 	    return;
 
 	}
@@ -111,18 +135,16 @@ public class Protocol {
      * 
      * @param command the command the user want us to execute
      */
-    public static void doAction(String command) {
+    public static void proccessCommand(String command) {
 	String[] arr = command.split("\\(|\\)|,");
+
+	System.out.println("[INFO] Protocol: Got command: " + arr[0]);
+
+	Connection connection;
 
 	switch (arr[0]) {
 	case CMD_REGISTER:
-	    // Here we check if we register with ip or ip and port number
-	    // Since to test locally i can only do it with localhost as ip
-	    if (arr.length > 2) {
-		curMachine.register(arr[1], Integer.valueOf(arr[2]));
-	    } else {
-		curMachine.register(arr[1]);
-	    }
+	    curMachine.register(arr[1]);
 	    return;
 
 	case CMD_SHOW_IP_TABLE:
@@ -131,45 +153,59 @@ public class Protocol {
 
 	case CMD_PUSH:
 	    if (arr.length < 2) {
-		System.out.println(
-			"Command does not contain ip or machine number");
+		System.out
+			.println("[ERROR] Protocol: Weird command: " + command);
 		return;
 	    }
 
-	    if (arr[1].contains("l") || arr[1].contains(".")) {
-		curMachine.pull(arr[1]);
-	    } else {
-		curMachine.pull(Integer.parseInt(arr[1]));
+	    connection = curMachine.findConnection(arr[1]);
+
+	    if (connection == null) {
+		System.out.println("[ERROR] Protocol: Could not find dest:");
+		return;
 	    }
 
-	    return;
+	    else {
+		for (String word : Dictionary.getDic()) {
+		    Protocol.sendMessage(connection, MSG_TABLE_ENTRY, word);
+		}
+	    }
+
+	    break;
 
 	case CMD_PULL:
 	    if (arr.length < 2) {
 		System.out.println(
-			"Command does not contain ip or machine number");
+			"[ERROR] Protocol: Command does not contain ip or machine number");
 		return;
 	    }
 
-	    if (arr[1].contains("l") || arr[1].contains(".")) {
-		curMachine.pull(arr[1]);
-	    } else {
-		curMachine.pull(Integer.parseInt(arr[1]));
+	    connection = curMachine.findConnection(arr[1]);
+
+	    if (connection == null) {
+		System.out.println("[ERROR] Protocol: Could not find dest:");
+		return;
 	    }
 
-	    return;
+	    Protocol.sendMessage(connection, MSG_REQUEST_TABLE, "");
+	    break;
 
 	case CMD_PUSH_PULL:
-	    doAction("push(" + arr[1]);
-	    doAction("pull(" + arr[1]);
+	    proccessCommand("push(" + arr[1] + ")");
+	    proccessCommand("pull(" + arr[1] + ")");
 	    return;
 
 	case CMD_SHOW_DIC:
-	    curMachine.showCurrentDic();
+	    Dictionary.showDic();
 	    return;
 
+	case CMD_HELP:
+	    System.out.printf("[INFO] Protocol: Help: %s: %s: %s: %s: %s:\n",
+		    CMD_SHOW_IP_TABLE, CMD_PULL, CMD_PULL, CMD_PUSH_PULL,
+		    CMD_SHOW_DIC);
+	    break;
 	default:
-	    System.out.println("Unkown command [" + command + "]");
+	    System.out.println("[ERROR] Protocol: Unkown command: " + command);
 	}
     }
 

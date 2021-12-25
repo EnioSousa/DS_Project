@@ -4,38 +4,56 @@ import java.io.PrintWriter;
 
 public class WriteChannel {
     /**
-     * Connection to the other machine
+     * Connection to the another machine
      */
     private Connection connection;
     /**
-     * Object used to write
+     * Print stream to the other machine
      */
     private PrintWriter out;
 
-    Thread writeThread;
-
+    /**
+     * Constructor creates a printing stream
+     * 
+     * @param connection Connection to another machine
+     * @throws Exception Failed to create the print stream
+     */
     public WriteChannel(Connection connection) throws Exception {
-	super();
 	this.connection = connection;
 
-	out = new PrintWriter(connection.getSocket().getOutputStream(), true);
+	out = new PrintWriter(connection.getSocket().getOutputStream());
     }
 
     /**
-     * Method initiates a new thread that is responsible for writing to the
-     * socket.
+     * Sends a string to another machine
      * 
-     * @param string to write in the socket
+     * @param string The string to send
+     * @param block  If true the call will block, otherwise is non blocking
      */
-    public void write(String string) {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		if (!connection.getSocket().isOutputShutdown()) {
-		    out.println(string);
-		}
+    void write(String string, boolean block) {
+	if (block) {
+	    if (!connection.getSocket().isOutputShutdown()) {
+		out.println(string);
 	    }
-	}).start();
+
+	} else {
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    if (!connection.getSocket().isOutputShutdown()) {
+			out.println(string);
+			out.flush();
+		    }
+		}
+	    }).start();
+	}
+    }
+
+    /**
+     * Close the writing channel
+     */
+    void close() {
+	out.close();
     }
 
 }

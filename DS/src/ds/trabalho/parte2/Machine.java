@@ -48,6 +48,7 @@ public class Machine {
      * The dictionary
      */
     Dictionary dic;
+    private Machine machine;
 
     /**
      * Constructor will create a new listing thread, a shell thread and initiate
@@ -63,6 +64,7 @@ public class Machine {
 	this.connections = new ArrayList<>();
 	this.ipTable = new ArrayList<>();
 	this.dic = new Dictionary();
+	this.machine = this;
 
 	Protocol.setCurMachine(this);
 
@@ -72,14 +74,16 @@ public class Machine {
 	    public void run() {
 		Scanner in = new Scanner(System.in);
 
-		System.out.println("SHELL STARTED");
+		System.out.println("[INFO]: Shell: Started: ");
 
 		while (in.hasNext()) {
-		    Protocol.doAction(in.nextLine());
+		    Protocol.proccessCommand(in.nextLine());
 		}
 
 		in.close();
-		System.out.println("SHELL CLOSED");
+		System.out.println("[INFO]: Shell: Closed: ");
+
+		stopMachine();
 	    }
 	});
 	shell.start();
@@ -88,7 +92,8 @@ public class Machine {
 	listen = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		System.out.println("START LISTENING ON PORT: " + listenPort);
+		System.out.println("[INFO] Server: Start listening on port: "
+			+ listenPort);
 		ServerSocket serverSocket = null;
 
 		try {
@@ -99,23 +104,34 @@ public class Machine {
 
 			if (!haveConnection(socket.getInetAddress())) {
 
-			    addConnection(new Connection(socket, id));
+			    Connection connection = new Connection(machine,
+				    socket, id);
 
-			    ipTable.add(socket.getInetAddress());
-
-			    System.out.println(
-				    "ACCEPTED: " + socket.getInetAddress() + " "
-					    + socket.getPort());
+			    if (connection.isOpen()) {
+				System.out.println(
+					"[INFO] Server: Connection success: "
+						+ socket.getInetAddress() + ": "
+						+ socket.getPort());
+				addConnection(connection);
+			    } else {
+				System.out.println(
+					"[ERROR] Server: Conenction failed: "
+						+ socket.getInetAddress() + ": "
+						+ socket.getPort());
+			    }
 			} else {
 			    System.out.println(
-				    "REJECTED:" + socket.getInetAddress() + " "
+				    "[ERROR] Server: Connection failed: "
+					    + socket.getInetAddress() + ": "
 					    + socket.getPort());
 			}
 		    }
 		} catch (Exception e) {
 		    e.printStackTrace();
 		} finally {
-		    System.out.println("STOP LISTENING ON PORT: " + listenPort);
+		    System.out
+			    .println("[INFO]: Server: Stop listening on port: "
+				    + listenPort);
 		    try {
 			serverSocket.close();
 		    } catch (IOException e) {
@@ -124,6 +140,7 @@ public class Machine {
 	    }
 	});
 	listen.start();
+
     }
 
     /**
@@ -140,35 +157,49 @@ public class Machine {
 	    @Override
 	    public void run() {
 		if (haveConnection(ip)) {
-		    System.out.println("ALREADY CONNECTED: " + ip + " " + port);
+		    System.out.println("[INFO] Connection: Already connected: "
+			    + ip + ": " + port);
 		    return;
 		}
-
-		System.out.println("ATTEMPT: " + ip + " " + port);
 
 		boolean tryAgain = true;
 
 		while (tryAgain) {
 		    try {
 			Socket socket = new Socket(ip, port);
-			System.out.println("SUCCESS: " + ip + " " + port);
 
-			addConnection(new Connection(socket, id));
+			Connection connection = new Connection(machine, socket,
+				id);
 
-			ipTable.add(ip);
+			if (connection.isOpen()) {
+			    System.out.println(
+				    "[INFO] Connection: Connection success: "
+					    + socket.getInetAddress() + ": "
+					    + socket.getPort());
+			    addConnection(connection);
+			    tryAgain = false;
+			} else {
+			    System.out.println(
+				    "[ERROR] Connection: Connection failed: "
+					    + socket.getInetAddress() + ": "
+					    + socket.getPort());
+			}
 
-			tryAgain = false;
 		    } catch (ConnectException e) {
 			try {
 			    Thread.sleep(3000);
-			    System.out.println("RETRY: " + ip + " " + port);
+			    System.out.println("[INFO] Connectionn: Retry: "
+				    + ip + ": " + port);
 			} catch (InterruptedException e1) {
-			    System.err.println("Sleep interrupted:" + e1);
+			    System.err.println(
+				    "[ERROR] Connection: Sleep interrupted:"
+					    + e1);
 			}
 		    } catch (Exception e) {
 			e.printStackTrace();
 			tryAgain = false;
-			System.out.println("FAIL: " + ip + " " + port);
+			System.out.println("[ERROR] Connection: FAIL: " + ip
+				+ ": " + port);
 		    }
 		}
 	    }
@@ -199,21 +230,14 @@ public class Machine {
      * Print our current ip table
      */
     public void showCurrentIpTable() {
-	System.out.println("Ip Table start:");
+	System.out.println("[INFO] Machine: Ip Table start:");
 	int i = 0;
 	for (InetAddress ip : ipTable) {
-	    System.out.println("Entry: " + i + " " + ip);
+	    System.out.println("[INFO] Machine: Table Entry: " + i
+		    + ": Table Value: " + ip);
 	    i++;
 	}
-	System.out.println("Ip table end:");
-    }
-
-    /**
-     * Print our current disc. Be careful method is blocking, since several
-     * thread have access to our dictionary
-     */
-    public void showCurrentDic() {
-	dic.showDic();
+	System.out.println("[INFO] Machine: Ip table end:");
     }
 
     /**
@@ -222,7 +246,9 @@ public class Machine {
      * @param connection The connection to add
      */
     public void addConnection(Connection connection) {
-	connections.add(connection);
+	if (connections.add(connection)) {
+	    ipTable.add(connection.getAddress());
+	}
     }
 
     /**
@@ -231,43 +257,23 @@ public class Machine {
      * @param connection connection to remove
      */
     public void remConnection(Connection connection) {
-	connections.remove(connection);
+	if (connections.remove(connection)) {
+	    ipTable.remove(connection.getAddress());
+	    System.out.println("[INFO] Machine: Lost connection: "
+		    + connection.getAddress());
+	}
+
+	if (connections.size() == 0)
+	    stopMachine();
     }
 
-    /**
-     * Get machine id
-     * 
-     * @return
-     */
-    public int getId() {
-	return id;
-    }
+    public void stopMachine() {
+	for (Connection connection : connections) {
+	    connection.close();
+	}
 
-    /**
-     * Set machine id
-     * 
-     * @param id
-     */
-    public void setId(int id) {
-	this.id = id;
-    }
-
-    /**
-     * Get listing port
-     * 
-     * @return
-     */
-    public int getListenPort() {
-	return listenPort;
-    }
-
-    /**
-     * Add word to our dictionary. Method blocks thread
-     * 
-     * @param word word to add
-     */
-    public void addWord(String word) {
-	dic.addWord(word);
+	System.out.println("[INFO] Machine: Stop:");
+	System.exit(0);
     }
 
     /**
@@ -289,91 +295,18 @@ public class Machine {
 	try {
 	    register(InetAddress.getByName(ip), port);
 	} catch (UnknownHostException e) {
+	    System.out.println("[ERRO] Machine: Could not find host address: "
+		    + ip + ": " + port);
 	}
     }
 
     /**
      * Attemp connection another another machine
      * 
-     * @param ip   inetaddress to connect
-     * @param port port to connect
+     * @param ip inetaddress to connect
      */
     public void register(InetAddress ip, int port) {
 	attemptConnection(ip, port);
-    }
-
-    /**
-     * Send current dictionary to another machine
-     * 
-     * @param ip ip(string) of the other machine
-     */
-    public void push(String ip) {
-	push(findConnection(ip));
-    }
-
-    /**
-     * Send current dictionary to another machine
-     * 
-     * @param id the other machine id
-     */
-    public void push(int id) {
-	push(findConnection(id));
-    }
-
-    public void push(Connection connection) {
-	if (connection == null) {
-	    System.out.println("Machine not found");
-	    return;
-	}
-
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		dic.lock.readLock().lock();
-
-		try {
-		    for (String string : dic.getDic()) {
-			Protocol.send(connection, Protocol.MSG_TABLE, string);
-		    }
-		} finally {
-		    System.out.println("Pushed has finished");
-		    dic.lock.readLock().unlock();
-		}
-	    }
-	}).start();
-
-    }
-
-    /**
-     * Request another machine dictionary
-     * 
-     * @param ip The ip of the other machine
-     */
-    public void pull(String ip) {
-	pull(findConnection(ip));
-    }
-
-    /**
-     * Request another machine dictionary
-     * 
-     * @param id the id of the other machine
-     */
-    public void pull(int id) {
-	pull(findConnection(id));
-    }
-
-    /**
-     * Request another machine dictionary
-     * 
-     * @param connection The connection with the other machine
-     */
-    public void pull(Connection connection) {
-	if (connection == null) {
-	    System.out.println("Machine not found");
-	    return;
-	}
-	Protocol.send(connection, Protocol.MSG_SEND_TABLE, null);
-
     }
 
     /**
@@ -403,10 +336,6 @@ public class Machine {
 	for (Connection connection : connections) {
 	    if (connection.getSocket().getInetAddress().equals(ip))
 		return connection;
-
-	    else
-		System.out.println(
-			connection.getSocket().getInetAddress() + " " + ip);
 	}
 
 	return null;
@@ -425,6 +354,38 @@ public class Machine {
 	}
 
 	return null;
+    }
+
+    public void getMachineState() {
+	Dictionary.showDic();
+	showCurrentIpTable();
+    }
+
+    /**
+     * Get machine id
+     * 
+     * @return
+     */
+    public int getId() {
+	return id;
+    }
+
+    /**
+     * Set machine id
+     * 
+     * @param id
+     */
+    public void setId(int id) {
+	this.id = id;
+    }
+
+    /**
+     * Get listing port
+     * 
+     * @return
+     */
+    public int getListenPort() {
+	return listenPort;
     }
 
 }

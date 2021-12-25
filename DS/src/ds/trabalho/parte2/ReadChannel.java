@@ -13,13 +13,10 @@ public class ReadChannel {
      */
     Connection connection;
 
-    /**
-     * Constructor will create the necessary buffers and start a new thread that
-     * will listen for incoming messages
-     * 
-     * @param connection the connection to the other machine
-     * @throws Exception
-     */
+    private Thread thread;
+
+    private boolean stop = false;
+
     public ReadChannel(Connection connection) throws Exception {
 	super();
 	this.connection = connection;
@@ -27,28 +24,44 @@ public class ReadChannel {
 	in = new BufferedReader(
 		new InputStreamReader(connection.getSocket().getInputStream()));
 
-	read();
-    }
-
-    /**
-     * Method will create a new thread that will listen to messages and pass
-     * them through a protocol
-     */
-    private void read() {
-	new Thread(new Runnable() {
+	thread = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		String str = "Something";
-		while (!connection.getSocket().isInputShutdown()
-			&& str != null) {
+		while (canContinue()) {
 		    try {
-			str = in.readLine();
-			Protocol.receive(connection, str);
+			String str = in.readLine();
+
+			if (str == null) {
+			    connection.close();
+			} else {
+			    Protocol.proccessMessage(connection, str);
+			}
 		    } catch (Exception e) {
 			e.printStackTrace();
 		    }
 		}
 	    }
-	}).start();
+	});
+
+	thread.start();
+    }
+
+    void close() throws Exception {
+	setStop(true);
+	in.close();
+	thread.interrupt();
+    }
+
+    private boolean canContinue() {
+	return !isStop() && connection.getSocket() != null
+		&& !connection.getSocket().isInputShutdown();
+    }
+
+    public boolean isStop() {
+	return stop;
+    }
+
+    public void setStop(boolean stop) {
+	this.stop = stop;
     }
 }

@@ -1,113 +1,154 @@
 package ds.trabalho.parte2;
 
-import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 
-/**
- * Class is responsible for holding pertinent informantion about a connection.
- * This connection has a socket, write and read channel. The write and read
- * channels are object that create threads to read and write
- * 
- * @author enio95
- *
- */
 public class Connection {
     /**
-     * The socket connection with the other machine
-     */
-    private Socket socket;
-    /**
-     * Our machine ID
+     * Our machine id
      */
     private Integer myMachineId;
     /**
-     * The other machine ID
+     * The other machine id
      */
     private Integer otherMachineId;
     /**
-     * Object responsible for handling the writes
+     * The socket to the other machine
      */
-    private WriteChannel writeChannel;
+    private final Socket socket;
     /**
-     * Object responsible for handling the reads
+     * The address to the other machine
      */
-    private ReadChannel readChannel;
+    private final InetAddress address;
+    /**
+     * The object responsible for writing to the other machine
+     */
+    private WriteChannel write;
+    /**
+     * The object responsible for reading stuff from the other machine
+     */
+    private ReadChannel read;
+    /**
+     * Our machine "pointer"
+     */
+    private final Machine machine;
+    /**
+     * True is the connection is open, otherwise false
+     */
+    private boolean isOpen = true;
 
     /**
-     * COonstructor receives a socket and tries to initiate the read and write
-     * channels. Once the object is created, it will try to send an hello
-     * message to the other machine, if the channels were successfully created
+     * Creates the write and read channels, and sends an hello message with our
+     * machine id
      * 
-     * @param socket      Socket connection with the other machine
-     * @param myMachineId this machine id
-     * @throws Exception
+     * @param machine     Our machine "pointer"
+     * @param socket      The socket to the other machine
+     * @param myMachineId Our machine id
      */
-    public Connection(Socket socket, int myMachineId) throws Exception {
+    Connection(Machine machine, Socket socket, int myMachineId) {
+	this.machine = machine;
 	this.socket = socket;
 	this.myMachineId = myMachineId;
-	readChannel = new ReadChannel(this);
-	writeChannel = new WriteChannel(this);
+	this.address = socket.getInetAddress();
 
-	Protocol.send(this, Protocol.MSG_HELLO, String.valueOf(myMachineId));
+	try {
+	    this.write = new WriteChannel(this);
+	} catch (Exception e) {
+	    setOpen(false);
+	    System.out.println(e);
+	}
+
+	try {
+	    this.read = new ReadChannel(this);
+	} catch (Exception e) {
+	    setOpen(false);
+	    write = null;
+	    System.out.println(e);
+	}
+
+	Protocol.sendMessage(this, Protocol.MSG_HELLO,
+		String.valueOf(getMyMachineId()));
     }
 
     /**
-     * Close connection will close the socket and the associated input and
-     * output channels
+     * Get our machine state
      */
-    public void closeConnection() {
-	try {
-	    socket.getInputStream().close();
-	    socket.getOutputStream().close();
-	    socket.close();
-	} catch (IOException e) {
-	    e.printStackTrace();
+    public void getMachineState() {
+	machine.getMachineState();
+    }
+
+    /**
+     * Check if our connection is open
+     * 
+     * @return boolean, true if the connection is alive
+     */
+    public boolean isOpen() {
+	return isOpen;
+    }
+
+    /**
+     * Set our connection the dead or alive
+     * 
+     * @param isOpen boolean, if true conencton is alive
+     */
+    public void setOpen(boolean isOpen) {
+	this.isOpen = isOpen;
+    }
+
+    /**
+     * Send a message to the other machine
+     * 
+     * @param message The mesasage to send
+     * @param block   if true the call blocks
+     */
+    void send(String message, boolean block) {
+	if (isOpen()) {
+	    write.write(message, block);
+	} else {
+	    System.out.println("[ERROR] Connection: Connection is closed:");
 	}
     }
 
     /**
-     * Write a string to the socket.
-     * 
-     * @param str String to write
+     * Close the current connection. This method will also remove this
+     * connection from the machine
      */
-    public void write(String str) {
-	if (writeChannel != null && !socket.isClosed())
-	    writeChannel.write(str);
+    void close() {
+	try {
+	    write.close();
+	    read.close();
+	} catch (Exception e) {
+	}
+
+	try {
+	    socket.close();
+	} catch (Exception e) {
+	}
+
+	setOpen(false);
+	machine.remConnection(this);
     }
 
-    /**
-     * Get the socket associated with this connection
-     * 
-     * @return The associated socket
-     */
-    public Socket getSocket() {
-	return socket;
-    }
-
-    /**
-     * Get the id of our machine
-     * 
-     * @return
-     */
     public Integer getMyMachineId() {
 	return myMachineId;
     }
 
-    /**
-     * Get the id of the other machine. The machine that we are connected
-     * 
-     * @return
-     */
     public Integer getOtherMachineId() {
 	return otherMachineId;
     }
 
-    /**
-     * Set the Id of the other machine. This method is called when we receive an
-     * hello message from the other machine. There are no security features
-     * 
-     * @param otherMachineId The other machine id
-     */
+    public InetAddress getAddress() {
+	return address;
+    }
+
+    public Socket getSocket() {
+	return socket;
+    }
+
+    public void setMyMachineId(Integer myMachineId) {
+	this.myMachineId = myMachineId;
+    }
+
     public void setOtherMachineId(Integer otherMachineId) {
 	this.otherMachineId = otherMachineId;
     }
