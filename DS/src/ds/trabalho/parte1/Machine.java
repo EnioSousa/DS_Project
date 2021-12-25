@@ -114,12 +114,13 @@ public class Machine {
 	listen = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		System.out.println("[INFO] Server: Start listening on port: "
-			+ listenPort);
 		ServerSocket serverSocket = null;
 
 		try {
 		    serverSocket = new ServerSocket(listenPort);
+		    System.out
+			    .println("[INFO] Server: Start listening on port: "
+				    + listenPort);
 
 		    Socket socket = serverSocket.accept();
 
@@ -203,7 +204,6 @@ public class Machine {
 			}
 		    } catch (ConnectException e) {
 			try {
-			    System.out.println(e);
 			    Thread.sleep(3000);
 			    System.out.println("[INFO] Connectionn: Retry: "
 				    + ip + ": " + port);
