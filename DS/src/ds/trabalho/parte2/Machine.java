@@ -214,16 +214,12 @@ public class Machine {
      * @return true if ip is on ip table, otherwise false
      */
     public boolean haveConnection(InetAddress ip) {
-	try {
-	    if (ipTable.indexOf(ip) == -1
-		    || ip.equals(InetAddress.getByName("localhost"))) {
-		return false;
-	    }
-	} catch (UnknownHostException e) {
-	    e.printStackTrace();
+	for (InetAddress iteIp : getIpTable()) {
+	    if (iteIp.getAddress().equals(ip.getAddress()))
+		return true;
 	}
 
-	return true;
+	return false;
     }
 
     /**
@@ -359,6 +355,26 @@ public class Machine {
     public void getMachineState() {
 	Dictionary.showDic();
 	showCurrentIpTable();
+    }
+
+    /**
+     * Clones and return the connection list. There are some problems with
+     * concurrency, so unfortunatly we need to clone
+     * 
+     * @return
+     */
+    public List<Connection> getConnections() {
+	return new ArrayList<Connection>(connections);
+    }
+
+    /**
+     * Clones and return the ipTable list. There are some problems with
+     * concurrency, so unfortunatly we need to clone
+     * 
+     * @return
+     */
+    public List<InetAddress> getIpTable() {
+	return new ArrayList<InetAddress>(ipTable);
     }
 
     /**

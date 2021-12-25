@@ -55,7 +55,7 @@ public class Protocol {
 	    break;
 
 	case GOODBYE:
-	    connection.send(ACK_GOODBYE, true);
+	    Protocol.sendMessage(connection, ACK_GOODBYE, null);
 	    connection.close();
 	    break;
 
@@ -96,6 +96,10 @@ public class Protocol {
 
 	case GOODBYE:
 	    connection.send(GOODBYE + ":", false);
+	    break;
+
+	case ACK_GOODBYE:
+	    connection.send(ACK_GOODBYE, true);
 	    break;
 
 	default:
