@@ -200,8 +200,7 @@ public class Protocol {
 	    return;
 
 	case CMD_HELP:
-	    System.out.printf(
-		    "[INFO] Protocol: CMD available: %s: %s: %s: %s: %s:\n",
+	    System.out.printf("[INFO] Protocol: Help: %s: %s: %s: %s: %s:\n",
 		    CMD_SHOW_IP_TABLE, CMD_PULL, CMD_PULL, CMD_PUSH_PULL,
 		    CMD_SHOW_DIC);
 	    break;
