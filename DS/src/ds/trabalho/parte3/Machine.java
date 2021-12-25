@@ -162,6 +162,13 @@ public class Machine {
 		boolean tryAgain = true;
 
 		while (tryAgain) {
+		    if (haveConnection(ip)) {
+			System.out.println(
+				"[INFO] Connection: Already connected: " + ip
+					+ ": " + port);
+			return;
+		    }
+
 		    try {
 			Socket socket = new Socket(ip, port);
 
