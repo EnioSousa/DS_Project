@@ -299,7 +299,8 @@ public class Machine {
     }
 
     public Connection findNextMachine() {
-	return findMachine((id + 1) % totalMachines + 1);
+	int nextMachine = id + 1 > totalMachines ? 1 : id + 1;
+	return findMachine(nextMachine);
     }
 
     public Connection findMachine(int id) {
