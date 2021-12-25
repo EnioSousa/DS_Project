@@ -26,6 +26,19 @@ tr3:
 tr4:
 	cd $(BIN); java $(PACKAGE)1/TokenRing --id 4 --ip l116 --port 5000 --listenPort 5000
 
+dic0:
+	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 0 --listenPort 5000
+dic1:
+	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 0 --listenPort 5000
+dic2:
+	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 0 --listenPort 5000
+dic3:
+	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 0 --listenPort 5000
+dic4:
+	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 0 --listenPort 5000
+dic5:
+	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 0 --listenPort 5000
+
 checkDir:
 	mkdir -p $(BIN)
 
