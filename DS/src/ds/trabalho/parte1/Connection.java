@@ -1,247 +1,155 @@
 package ds.trabalho.parte1;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
-/**
- * Class is responsible for creating threads to read and write to sockets, since
- * those operations are blocking, and also has the possibility to initiate a
- * connection if an IP and Port is given
- * 
- * @author enio95
- *
- */
 public class Connection {
-    Machine machine;
-    Socket socket;
-
-    private Integer machineID;
-
-    private Write write;
-    private Read read;
+    /**
+     * Our machine id
+     */
+    private Integer myMachineId;
+    /**
+     * The other machine id
+     */
+    private Integer otherMachineId;
+    /**
+     * The socket to the other machine
+     */
+    private final Socket socket;
+    /**
+     * The address to the other machine
+     */
+    private final InetAddress address;
+    /**
+     * The object responsible for writing to the other machine
+     */
+    private WriteChannel write;
+    /**
+     * The object responsible for reading stuff from the other machine
+     */
+    private ReadChannel read;
+    /**
+     * Our machine "pointer"
+     */
+    private final Machine machine;
+    /**
+     * True is the connection is open, otherwise false
+     */
+    private boolean isOpen = true;
 
     /**
-     * Constructor receives a connection and tries to create the read and write
-     * threads
+     * Creates the write and read channels, and sends an hello message with our
+     * machine id
      * 
-     * @param machine Machine that created this object
-     * @param socket  The socket connection with the other machine
+     * @param machine     Our machine "pointer"
+     * @param socket      The socket to the other machine
+     * @param myMachineId Our machine id
      */
-    public Connection(Machine machine, Socket socket) {
+    Connection(Machine machine, Socket socket, int myMachineId) {
 	this.machine = machine;
 	this.socket = socket;
+	this.myMachineId = myMachineId;
+	this.address = socket.getInetAddress();
 
-	startThreads();
-    }
-
-    /**
-     * Constructor will try to initiate a new connection with another machine,
-     * it also creates the read and write threads
-     * 
-     * @param machine The machine that created this object
-     * @param ip      The ip of the other machine
-     * @param port    the port to connect with the other machine
-     */
-    public Connection(Machine machine, InetAddress ip, int port) {
-	this.machine = machine;
-
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		System.out
-			.println("Attempt connection with: " + ip + " " + port);
-
-		boolean tryAgain = true;
-
-		while (tryAgain) {
-		    try {
-			while (!ip.isReachable(3000))
-			    ;
-
-			socket = new Socket(ip, port);
-			System.out.println("Connection attempt Success: " + ip
-				+ " " + port);
-
-			startThreads();
-			tryAgain = false;
-
-		    } catch (Exception e) {
-			tryAgain = true;
-		    }
-		}
-
-	    }
-	}).start();
-    }
-
-    /*
-     * Starts the read and write threads
-     */
-    private void startThreads() {
-	read = new Read(this);
-	read.start();
-
-	write = new Write(this);
-	write.start();
-    }
-
-    /**
-     * Register the machine ID that we are CONNECTED
-     * 
-     * @param n
-     */
-    public void setMachineId(int n) {
-	machineID = n;
-    }
-
-    /**
-     * Get the machine id that we are connected
-     * 
-     * @return
-     */
-    public Integer getMachineId() {
-	return machineID;
-    }
-
-    /**
-     * Get socket
-     * 
-     * @return socket
-     */
-    public Socket getSocket() {
-	return socket;
-    }
-
-    /**
-     * Send a string through the connection
-     * 
-     * @param str String to send
-     */
-    public void send(String str) {
-	write.write(str);
-    }
-
-    /**
-     * Close the read and write threads
-     */
-    public void closeConnection() {
-	if (write != null && !write.isInterrupted()) {
-	    write.closeThread();
-	    write = null;
+	try {
+	    this.write = new WriteChannel(this);
+	} catch (Exception e) {
+	    setOpen(false);
+	    System.out.println(e);
 	}
 
-	if (read != null && !read.isInterrupted()) {
-	    read.closeThread();
-	    read = null;
+	try {
+	    this.read = new ReadChannel(this);
+	} catch (Exception e) {
+	    setOpen(false);
+	    write = null;
+	    System.out.println(e);
+	}
+
+	Protocol.sendMessage(this, Protocol.HELLO,
+		String.valueOf(getMyMachineId()));
+    }
+
+    /**
+     * Get our machine state
+     */
+    public void getMachineState() {
+	machine.getMachineState();
+    }
+
+    /**
+     * Check if our connection is open
+     * 
+     * @return boolean, true if the connection is alive
+     */
+    public boolean isOpen() {
+	return isOpen;
+    }
+
+    /**
+     * Set our connection the dead or alive
+     * 
+     * @param isOpen boolean, if true conencton is alive
+     */
+    public void setOpen(boolean isOpen) {
+	this.isOpen = isOpen;
+    }
+
+    /**
+     * Send a message to the other machine
+     * 
+     * @param message The mesasage to send
+     * @param block   if true the call blocks
+     */
+    void send(String message, boolean block) {
+	if (isOpen()) {
+	    write.write(message, block);
+	} else {
+	    System.out.println("[ERROR] Connection: Connection is closed:");
+	}
+    }
+
+    /**
+     * Close the current connection. This method will also remove this
+     * connection from the machine
+     */
+    void close() {
+	try {
+	    write.close();
+	    read.close();
+	} catch (Exception e) {
 	}
 
 	try {
 	    socket.close();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	} finally {
-	    machine.delConnection(this);
+	} catch (Exception e) {
 	}
+
+	setOpen(false);
+	machine.remConnection(this);
     }
 
-    /**
-     * Class is responsible for reading for a socket
-     * 
-     * @author enio95
-     *
-     */
-    private class Read extends Thread {
-	Connection connection;
-	BufferedReader in;
-
-	Read(Connection connection) {
-	    this.connection = connection;
-	}
-
-	public void run() {
-	    // Create read channel
-	    try {
-		in = new BufferedReader(
-			new InputStreamReader(socket.getInputStream()));
-	    } catch (IOException e) {
-		e.printStackTrace();
-		closeConnection();
-	    }
-
-	    // Read from channel
-	    while (socket != null && !socket.isClosed()
-		    && !socket.isInputShutdown() && in != null) {
-		try {
-		    Protocol.receive(connection, in.readLine());
-		} catch (IOException e) {
-		    if (read != null)
-			closeConnection();
-		}
-	    }
-
-	    closeConnection();
-	}
-
-	/**
-	 * Close current thread
-	 */
-	private void closeThread() {
-	    try {
-		in.close();
-		in = null;
-	    } catch (IOException e) {
-		e.printStackTrace();
-	    } finally {
-		System.out.println("Closed read thread");
-		Thread.currentThread().interrupt();
-	    }
-
-	}
+    public Integer getMyMachineId() {
+	return myMachineId;
     }
 
-    /**
-     * Class is responsible for writing to a socket
-     * 
-     * @author enio95
-     *
-     */
-    private class Write extends Thread {
-	private Connection connection;
-	private PrintWriter out;
+    public Integer getOtherMachineId() {
+	return otherMachineId;
+    }
 
-	Write(Connection connection) {
-	    this.connection = connection;
-	}
+    public InetAddress getAddress() {
+	return address;
+    }
 
-	public void run() {
-	    try {
-		out = new PrintWriter(socket.getOutputStream(), true);
-		Protocol.send(connection, Protocol.HELLO,
-			String.valueOf(machine.getId()));
-	    } catch (IOException e) {
-		e.printStackTrace();
-		closeConnection();
-	    }
-	}
+    public Socket getSocket() {
+	return socket;
+    }
 
-	/**
-	 * Write a string to a socket
-	 * 
-	 * @param str String to send
-	 */
-	public void write(String str) {
-	    out.println(str);
-	}
+    public void setMyMachineId(Integer myMachineId) {
+	this.myMachineId = myMachineId;
+    }
 
-	private void closeThread() {
-	    out.close();
-	    out = null;
-	    System.out.println("Closed write thread");
-	    Thread.currentThread().interrupt();
-	}
+    public void setOtherMachineId(Integer otherMachineId) {
+	this.otherMachineId = otherMachineId;
     }
 }

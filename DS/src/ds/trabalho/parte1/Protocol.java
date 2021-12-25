@@ -1,119 +1,142 @@
 package ds.trabalho.parte1;
 
-/**
- * Protocol class on how to deal with shell commands and inter-machine messages
- * 
- * @author enio95
- *
- */
 public class Protocol {
-    /*
-     * Send or Get the token
-     */
-    static final String TOKEN = "PASS_TOKEN";
     /*
      * Received or send an hello message
      */
     static final String HELLO = "HELLO";
+    /**
+     * Close connection
+     */
+    static final String GOODBYE = "GOODBYE";
+    /**
+     * Acknowledge the closing connection
+     */
+    static final String ACK_GOODBYE = "ACK_GOODBYE";
+    /**
+     * Process a token pass
+     */
+    static final String TOKEN = "TOKEN";
     /*
      * Lock token
      */
-    static final String UNLOCK_TOKEN = "unlock()";
+    static final String UNLOCK = "unlock()";
     /*
      * Unlock token
      */
-    static final String LOCK_TOKEN = "lock()";
+    static final String LOCK = "lock()";
+    /**
+     * Command patter to print the machine state
+     */
+    static final String STATE = "state()";
 
     /**
-     * Function is responsible for coordinating the action of a command
+     * Process a message received from another machine
      * 
-     * @param connection connection that sent us the command
-     * @param command    the command
+     * @param connection The connection that received the message
+     * @param message    The message received
      */
-    public static void receive(Connection connection, String command) {
-	if (command == null)
+    static void proccessMessage(Connection connection, String message) {
+	if (message == null) {
+	    System.out.println("[ERROR] Protocol: invalid message:");
 	    return;
-	String[] arr = command.split(":");
+	}
+
+	String[] arr = message.split(":");
+	System.out.println("[INFO] Protocol: Got message: " + arr[0]);
 
 	switch (arr[0]) {
 	case HELLO:
-	    connection.setMachineId(Integer.parseInt(arr[1]));
-	    System.out.println("Connected with machine: " + arr[1]);
-	    return;
+	    connection.setOtherMachineId(Integer.parseInt(arr[1]));
+	    break;
 
 	case TOKEN:
 	    Token.getToken(Integer.parseInt(arr[1]));
+	    break;
 
-	    System.out.println("Got token: " + Token.getTokenValue());
-	    return;
+	case GOODBYE:
+	    connection.send(ACK_GOODBYE, true);
+	    connection.close();
+	    break;
+
+	case ACK_GOODBYE:
+	    connection.close();
+	    break;
 
 	default:
-	    return;
+	    System.out.println(
+		    "[ERROR] Protocol: unkown message pattern: " + message);
+	    break;
 	}
     }
 
     /**
-     * Method is responsible for sending a request to a given connection
+     * Send a message to a connection with a request and a value associated
      * 
-     * @param connection connection to send the command/request
-     * @param req        the request to send
+     * @param connection The connection to send the message
+     * @param req        The request to send
+     * @param value      The value associated with the request
      */
-    public static void send(Connection connection, String req) {
-	send(connection, req, null);
-    }
-
-    /**
-     * Method is responsible for sending a request and a associated value to a
-     * given connection
-     * 
-     * @param connection connection to send the request/command
-     * @param req        command/request to send
-     * @param value      value associated with the command
-     */
-    public static void send(Connection connection, String req, String value) {
-	if (connection == null)
+    static void sendMessage(Connection connection, String req, String value) {
+	if (connection == null) {
+	    System.out.println("[ERROR] connection is null");
 	    return;
+	}
+
+	System.out.println("[INFO] Protocol: Trying to send message: " + req);
 
 	switch (req) {
-	case TOKEN:
-	    if (Token.passToken(connection)) {
-		System.out.println("Token passed to machine: "
-			+ connection.getMachineId());
-	    }
-	    return;
-
 	case HELLO:
-	    connection.send(HELLO + ":" + value);
-	    return;
+	    connection.send(HELLO + ":" + value, false);
+	    break;
+
+	case TOKEN:
+	    connection.send(TOKEN + ":" + value, false);
+	    break;
+
+	case GOODBYE:
+	    connection.send(GOODBYE + ":", false);
+	    break;
+
 	default:
-	    return;
+	    System.out.println("[ERROR] unknown request");
+	    break;
 	}
+
     }
 
     /**
-     * Method is responsible for starting the execution of shell commands
+     * Process a command from our machine shell
      * 
-     * @param command command to execute
+     * @param machine Our machine
+     * @param command The command we received from the shell
      */
-    public static void doAction(String command) {
-	String[] arr = command.split(":");
-
-	switch (arr[0]) {
-	case UNLOCK_TOKEN:
-	    Token.setTokenLock(false);
-	    System.out.println("Token unloked");
-
-	    Protocol.send(Machine.findNextMachine(), Protocol.TOKEN);
-	    return;
-
-	case LOCK_TOKEN:
-	    Token.setTokenLock(true);
-	    System.out.println("Token locked");
-	    return;
-
-	default:
-	    System.out.println("Unknown shell command [" + command + "]");
+    static void processCommand(Machine machine, String command) {
+	if (command == null) {
+	    System.out.println("[ERROR] command is null");
 	    return;
 	}
+
+	String[] arr = command.split(":");
+	System.out.println("[INFO] Protocol: Got command: " + arr[0]);
+
+	switch (arr[0]) {
+	case LOCK:
+	    Token.lockToken();
+	    break;
+
+	case UNLOCK:
+	    Token.unlockToken();
+	    break;
+
+	case STATE:
+	    machine.getMachineState();
+	    break;
+
+	default:
+	    System.out.println("[ERROR] unkown command");
+	    break;
+	}
     }
+
 }

@@ -3,54 +3,61 @@ package ds.trabalho.parte1;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-/**
- * Class is responsible for handling token related operations. Since we may have
- * a lot of threads trying to do operations on the token, this class uses lock
- * to make sure there is no concurrency
- * 
- * @author enio95
- *
- */
 public class Token {
-    static private boolean tokenOwn;
-    static private boolean tokenLock;
-    static private Integer tokenValue;
-
-    static private ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    public Token(boolean tokenOwn, boolean tokenLock, Integer tokenValue) {
-	super();
-	setTokenOwn(tokenOwn);
-	setTokenLock(tokenLock);
-	setTokenValue(tokenValue);
-    }
-
-    public static void passToken() {
-	passToken(Machine.findNextMachine());
-    }
+    /**
+     * if true we own the token
+     */
+    static private boolean tokenOwn = false;
+    /**
+     * if true we have a lock on the token
+     */
+    static private boolean tokenLock = false;
+    /**
+     * value of the token
+     */
+    static private Integer tokenValue = 0;
+    /**
+     * Lock to access the token values
+     */
+    static final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
-     * Pass the token
+     * Constructor will set the basic values for our token
      * 
-     * @param connection connection to pass the token
-     * @return true if the token was passed, otherwise false
+     * @param tokenOwn   if true we own the token
+     * @param tokenLock  if true we have a lock on the token
+     * @param tokenValue value of the token
      */
-    public static boolean passToken(Connection connection) {
-
+    public Token(boolean tokenOwn, boolean tokenLock, Integer tokenValue) {
 	lock.writeLock().lock();
 
 	try {
-	    if (tokenOwn && !tokenLock && connection != null) {
-		connection.send(
-			Protocol.TOKEN + ":" + String.valueOf(tokenValue + 1));
+	    Token.tokenLock = tokenLock;
+	    Token.tokenOwn = tokenOwn;
+	    Token.tokenValue = tokenValue;
+	} finally {
+	    lock.writeLock().unlock();
+	}
+    }
 
-		Token.tokenOwn = false;
+    /**
+     * Tries to pass the token to another machine
+     * 
+     * @param connection The connection to the other machine
+     */
+    static void passToken(Connection connection) {
+	if (connection == null)
+	    return;
 
-		return true;
-	    } else {
-		return false;
+	lock.writeLock().lock();
+	try {
+	    if (tokenOwn && !tokenLock) {
+		Protocol.sendMessage(connection, Protocol.TOKEN,
+			String.valueOf(tokenValue + 1));
+
+		System.out.println("[INFO] Token: pass token");
+		tokenOwn = false;
 	    }
-
 	} finally {
 	    lock.writeLock().unlock();
 	}
@@ -59,119 +66,61 @@ public class Token {
     /**
      * Get a token from another machine
      * 
-     * @param value The value of the token
+     * @param value The value associated with the token received
      */
-    public static void getToken(int value) {
+    static void getToken(int value) {
 	lock.writeLock().lock();
 
 	try {
-	    Token.tokenOwn = true;
-	    Token.tokenValue = value;
+	    tokenOwn = true;
+	    tokenValue = value;
+	    System.out.println("[INFO] Token: get token with value: "
+		    + String.valueOf(value));
 	} finally {
 	    lock.writeLock().unlock();
 	}
     }
 
     /**
-     * Checks if we own the token
-     * 
-     * @return true if we own the token otherwise false
+     * Lock the token
      */
-    public static boolean isTokenOwn() {
-	lock.readLock().lock();
-
-	boolean temp;
+    static void lockToken() {
+	lock.writeLock().lock();
 
 	try {
-	    temp = tokenOwn;
+	    tokenLock = true;
+	    System.out.println("[INFO] Token: lock token:");
+	} finally {
+	    lock.writeLock().unlock();
+	}
+    }
+
+    /**
+     * Unlock the token
+     */
+    static void unlockToken() {
+	lock.writeLock().lock();
+
+	try {
+	    tokenLock = false;
+	    System.out.println("[INFO] Token: unlock token");
+	} finally {
+	    lock.writeLock().unlock();
+	}
+    }
+
+    /**
+     * Show current token state
+     */
+    static void showCurrentState() {
+	lock.readLock().lock();
+
+	try {
+	    System.out.println(
+		    "[INFO] Token: token value: " + tokenValue + ": Token own: "
+			    + tokenOwn + ": Token lock: " + tokenLock);
 	} finally {
 	    lock.readLock().unlock();
 	}
-
-	return temp;
     }
-
-    /**
-     * Check if the machine has the token locked
-     * 
-     * @return true if the token is locked otherwise false
-     */
-    public static boolean isTokenLock() {
-	lock.readLock().lock();
-
-	boolean temp;
-
-	try {
-	    temp = tokenLock;
-	} finally {
-	    lock.readLock().unlock();
-	}
-
-	return temp;
-    }
-
-    /**
-     * Get the current token value
-     * 
-     * @return the token value
-     */
-    public static int getTokenValue() {
-	lock.readLock().lock();
-
-	int temp;
-
-	try {
-	    temp = tokenValue;
-	} finally {
-	    lock.readLock().unlock();
-	}
-
-	return temp;
-    }
-
-    /**
-     * Set the ownership of the token
-     * 
-     * @param tokenOwn true if we own the token, otherwise false
-     */
-    public static void setTokenOwn(boolean tokenOwn) {
-	lock.writeLock().lock();
-
-	try {
-	    Token.tokenOwn = tokenOwn;
-	} finally {
-	    lock.writeLock().unlock();
-	}
-    }
-
-    /**
-     * Set the lock on the token
-     * 
-     * @param tokenLock true if we want to lock the token, otherwise false
-     */
-    public static void setTokenLock(boolean tokenLock) {
-	lock.writeLock().lock();
-
-	try {
-	    Token.tokenLock = tokenLock;
-	} finally {
-	    lock.writeLock().unlock();
-	}
-    }
-
-    /**
-     * set the token value
-     * 
-     * @param tokenValue the value for the token
-     */
-    public static void setTokenValue(Integer tokenValue) {
-	lock.writeLock().lock();
-
-	try {
-	    Token.tokenValue = tokenValue;
-	} finally {
-	    lock.writeLock().unlock();
-	}
-    }
-
 }

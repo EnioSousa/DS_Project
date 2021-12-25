@@ -22,10 +22,10 @@ public class WriteChannel {
     }
 
     /**
-     * Method initiates a new thread that is responsible for writing in the
+     * Method initiates a new thread that is responsible for writing to the
      * socket.
      * 
-     * @param string
+     * @param string to write in the socket
      */
     public void write(String string) {
 	new Thread(new Runnable() {

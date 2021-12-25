@@ -1,100 +1,91 @@
 package ds.trabalho.parte1;
 
+import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * This class is responsible for holding pertinent information about the current
- * machine. Its responsible for creating the appropriate thread for
- * inter-machine communications.
+ * This class handles the machine. It creates a shell, to read commands from the
+ * user, a listening thread, to listen to incoming connection request and is
+ * able to connect to other machines. Its saves the connection information and
+ * the dictionary info that will be shared between our network
  * 
  * @author enio95
  *
  */
 public class Machine {
     /**
-     * Machine id
+     * Id of our machine
      */
-    private static int id;
-    /*
-     * Number of total machines in the token ring
-     */
-    private static final int totalMachines = 6;
-    /*
-     * Listening port for new connections
+    private int id;
+    /**
+     * The listening port for incoming connection request
      */
     private int listenPort;
-    /*
-     * Thread responsible for listening to new connections
-     */
-    private ListenToConnection listen;
-    /*
-     * A list of established connections with other machines
-     */
-    private static List<Connection> connections = new ArrayList<>();
-    /*
-     * A lock for the list of connections
-     */
-    private static ReadWriteLock lock = new ReentrantReadWriteLock();
-    /*
-     * Thread responsible for reading commands from the user
+    /**
+     * Thread that is responsible for reading commands from the user
      */
     private Thread shell;
+    /**
+     * Thread responsible for accepting connections
+     */
+    private Thread listen;
     /**
      * Thread is responsible for starting the process of sending the token to
      * another machine
      */
     private Thread scheduleTokenPass;
-    /*
-     * Time to wait before we trying to send the token to another machine
+    /**
+     * The list of connection this machine has
      */
-    private long waitTime = 2000;
-    /*
-     * Token thats used to set whose machine turn is it
+    private List<Connection> connections;
+    /**
+     * The ip table of other machines that we are connected
      */
-    Token token;
+    private List<InetAddress> ipTable;
 
-    /*
-     * Constructor is responsible for initialising the most basic stuff a
-     * machine needs
+    private Machine machine;
+
+    private final int totalMachines = 5;
+
+    /**
+     * Constructor will create a new listing thread, a shell thread and initiate
+     * the dictionary
      * 
-     * @param id Machine ID
-     * 
-     * @param listenPort Which port the machine is going to listen
+     * @param id         Id of our machine
+     * @param listenPort The listing port for new connection request
      */
     public Machine(int id, int listenPort) {
 	super();
-	Machine.id = id;
+	this.id = id;
 	this.listenPort = listenPort;
+	this.connections = new ArrayList<>();
+	this.ipTable = new ArrayList<>();
+	this.machine = this;
 
-	if (id == 0) {
-	    token = new Token(true, false, 0);
-	} else {
-	    token = new Token(false, false, null);
-	}
+	new Token(id == 1 ? true : false, false, 0);
 
-	listen = new ListenToConnection(this, false);
-	listen.start();
-
-	/**
-	 * Reads commands from stdin
-	 */
+	// Create a new shell thread
 	shell = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
 		Scanner in = new Scanner(System.in);
 
-		System.out.println("Command shell started");
+		System.out.println("[INFO] Shell: Started:");
 
 		while (in.hasNext()) {
-		    Protocol.doAction(in.nextLine());
+		    Protocol.processCommand(machine, in.nextLine());
 		}
 
 		in.close();
+		System.out.println("[INFO] Shell: Closed:");
+
 		stopMachine();
 	    }
 	});
@@ -108,136 +99,248 @@ public class Machine {
 	    @Override
 	    public void run() {
 		while (true) {
-		    if (Token.isTokenOwn() && !Token.isTokenLock()) {
-			passToken();
-		    } else {
-			try {
-			    Thread.sleep(waitTime);
-			} catch (InterruptedException e) {
-			    System.err.print("Sleepfailed");
-			}
+		    passToken();
+		    try {
+			Thread.sleep(5000);
+		    } catch (InterruptedException e) {
+			System.err.print("[ERROR] Schedule: Sleepfailed:");
 		    }
 		}
 	    }
 	});
 	scheduleTokenPass.start();
-    }
 
-    private void stopMachine() {
-	System.out.println("Stoping machine");
-	for (Connection connection : connections) {
-	    connection.closeConnection();
-	}
+	// Create a new thread that will listen to connection requests
+	listen = new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		System.out.println("[INFO] Server: Start listening on port: "
+			+ listenPort);
+		ServerSocket serverSocket = null;
 
-	scheduleTokenPass.interrupt();
-	System.out.println("Connections closed");
+		try {
+		    serverSocket = new ServerSocket(listenPort);
+
+		    Socket socket = serverSocket.accept();
+
+		    if (!haveConnection(socket.getInetAddress())) {
+
+			Connection connection = new Connection(machine, socket,
+				id);
+
+			if (connection.isOpen()) {
+			    System.out.println(
+				    "[INFO] Server: Connection success: "
+					    + socket.getInetAddress() + ": "
+					    + socket.getPort());
+			    addConnection(connection);
+			} else {
+			    System.out.println(
+				    "[ERROR] Server: Conenction failed: "
+					    + socket.getInetAddress() + ": "
+					    + socket.getPort());
+			}
+		    } else {
+			System.out.println("[ERROR] Server: Connection failed: "
+				+ socket.getInetAddress() + ": "
+				+ socket.getPort());
+		    }
+		} catch (Exception e) {
+		    e.printStackTrace();
+		} finally {
+		    System.out.println("[INFO] Server: Stop listening on port: "
+			    + listenPort);
+		    try {
+			serverSocket.close();
+		    } catch (IOException e) {
+		    }
+		}
+	    }
+	});
+	listen.start();
     }
 
     /**
-     * Get the machine ID
+     * Method will attempt to connect with another machine. The connection is
+     * only performed if the ip is not on the current ip table and if the other
+     * machine is accepting a connection. In case the other machine does not
+     * have a server waitng on that port we will retry after a given time
      * 
-     * @return ID of the machine
+     * @param ip   ip to connect
+     * @param port port to conenct
+     */
+    public void attemptConnection(InetAddress ip, int port) {
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		if (haveConnection(ip)) {
+		    System.out.println("[INFO] Connection: Already connected: "
+			    + ip + ": " + port);
+		    return;
+		}
+
+		boolean tryAgain = true;
+
+		while (tryAgain) {
+		    try {
+			Socket socket = new Socket(ip, port);
+
+			Connection connection = new Connection(machine, socket,
+				id);
+
+			if (connection.isOpen()) {
+			    System.out.println(
+				    "[INFO] Connection: Connection success: "
+					    + socket.getInetAddress() + ": "
+					    + socket.getPort());
+			    addConnection(connection);
+			    tryAgain = false;
+			} else {
+			    System.out.println(
+				    "[ERROR] Connection: Connection failed: "
+					    + socket.getInetAddress() + ": "
+					    + socket.getPort());
+			}
+		    } catch (ConnectException e) {
+			try {
+			    Thread.sleep(3000);
+			    System.out.println("[INFO] Connectionn: Retry: "
+				    + ip + ": " + port);
+			} catch (InterruptedException e1) {
+			    System.err.println(
+				    "[ERROR] Connection: Sleep interrupted:"
+					    + e1);
+			}
+		    } catch (Exception e) {
+			e.printStackTrace();
+			tryAgain = false;
+			System.out.println("[ERROR] Connection: FAIL: " + ip
+				+ ": " + port);
+		    }
+		}
+	    }
+	}).start();
+    }
+
+    /**
+     * Checks if we already have a connection to another machine that has the
+     * given ip
+     * 
+     * @param ip ip to check
+     * @return true if ip is on ip table, otherwise false
+     */
+    public boolean haveConnection(InetAddress ip) {
+	try {
+	    if (ipTable.indexOf(ip) == -1
+		    || ip.equals(InetAddress.getByName("localhost"))) {
+		return false;
+	    }
+	} catch (UnknownHostException e) {
+	    e.printStackTrace();
+	}
+
+	return true;
+    }
+
+    /**
+     * Print our current ip table
+     */
+    public void showCurrentIpTable() {
+	System.out.println("[INFO] Machine: Ip Table start:");
+	int i = 0;
+	for (InetAddress ip : ipTable) {
+	    System.out.println("[INFO] Machine: Table Entry: " + i
+		    + ": Table Value: " + ip);
+	    i++;
+	}
+	System.out.println("[INFO] Machine: Ip table end:");
+    }
+
+    /**
+     * Add a connection to ou list of connection
+     * 
+     * @param connection The connection to add
+     */
+    public void addConnection(Connection connection) {
+	if (connections.add(connection)) {
+	    ipTable.add(connection.getAddress());
+	}
+    }
+
+    /**
+     * Remove a connection from our list of connections
+     * 
+     * @param connection connection to remove
+     */
+    public void remConnection(Connection connection) {
+	if (connections.remove(connection)) {
+	    ipTable.remove(connection.getAddress());
+	    System.out.println("[INFO] Machine: Lost connection: "
+		    + connection.getAddress());
+	}
+
+	if (connections.size() == 0)
+	    stopMachine();
+    }
+
+    public void stopMachine() {
+	for (Connection connection : connections) {
+	    connection.close();
+	}
+
+	System.out.println("[INFO] Machine: Stop:");
+	System.exit(0);
+    }
+
+    public void getMachineState() {
+	showCurrentIpTable();
+	Token.showCurrentState();
+    }
+
+    public Connection findNextMachine() {
+	return findMachine((id + 1) % totalMachines);
+    }
+
+    public Connection findMachine(int id) {
+	for (Connection connection : connections) {
+	    Integer num = connection.getOtherMachineId();
+
+	    if (num != null && num == id) {
+		return connection;
+	    }
+	}
+
+	return null;
+    }
+
+    public void passToken() {
+	Token.passToken(findNextMachine());
+    }
+
+    /**
+     * Get machine id
+     * 
+     * @return
      */
     public int getId() {
 	return id;
     }
 
     /**
-     * Get the port that the this machines is listening to
+     * Set machine id
      * 
-     * @return listening port
+     * @param id
+     */
+    public void setId(int id) {
+	this.id = id;
+    }
+
+    /**
+     * Get listing port
+     * 
+     * @return
      */
     public int getListenPort() {
 	return listenPort;
-    }
-
-    @Override
-    public String toString() {
-	return "Machine [id=" + id + ", " + ", listenPort=" + listenPort + "]";
-    }
-
-    /**
-     * Connects the current machine to another machine
-     * 
-     * @param ip   IP of the other machine
-     * @param port Port of the other machine
-     */
-    public void connectTo(InetAddress ip, int port) {
-	addConnection(new Connection(this, ip, port));
-    }
-
-    /**
-     * Add a connection to another machine to our list of connections
-     * 
-     * @param connection A connection to another machine
-     */
-    public void addConnection(Connection connection) {
-	lock.writeLock().lock();
-
-	try {
-	    Machine.connections.add(connection);
-	} finally {
-	    lock.writeLock().unlock();
-	}
-    }
-
-    /**
-     * Remove a connection from our list
-     * 
-     * @param connection A connection to another machine
-     */
-    public void delConnection(Connection connection) {
-	lock.writeLock().lock();
-
-	try {
-	    Machine.connections.remove(connection);
-	} finally {
-	    lock.writeLock().unlock();
-	}
-    }
-
-    /**
-     * Find the connection to the machine that is next to ours. Example: If our
-     * machine is m2 then this function return m3 or m0
-     * 
-     * @return The connection the next machine if exists
-     */
-    public static Connection findNextMachine() {
-	return findMachine((id + 1) % totalMachines);
-    }
-
-    /**
-     * Given an ID, this function will find the connection that has a machine
-     * that matches the given ID
-     * 
-     * @param id ID of the other machine
-     * @return Connection to the other machine
-     */
-    private static Connection findMachine(int id) {
-	lock.readLock().lock();
-
-	try {
-	    for (Connection connection : connections) {
-		if (connection.getMachineId() != null
-			&& connection.getMachineId() == id) {
-		    return connection;
-		}
-	    }
-	} finally {
-	    lock.readLock().unlock();
-	}
-
-	return null;
-    }
-
-    public void closeProgram() {
-
-    }
-
-    /**
-     * Function will pass the token, if in its possession, to the next machine.
-     */
-    public void passToken() {
-	Protocol.send(findNextMachine(), Protocol.TOKEN);
     }
 }
