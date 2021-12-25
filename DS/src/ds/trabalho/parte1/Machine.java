@@ -299,7 +299,7 @@ public class Machine {
     }
 
     public Connection findNextMachine() {
-	return findMachine((id + 1) % totalMachines);
+	return findMachine((id + 1) % totalMachines + 1);
     }
 
     public Connection findMachine(int id) {
