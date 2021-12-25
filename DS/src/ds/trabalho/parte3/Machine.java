@@ -1,4 +1,4 @@
-package ds.trabalho.parte;
+package ds.trabalho.parte3;
 
 import java.io.IOException;
 import java.net.ConnectException;

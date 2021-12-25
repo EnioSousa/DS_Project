@@ -1,4 +1,4 @@
-package ds.trabalho.parte;
+package ds.trabalho.parte3;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

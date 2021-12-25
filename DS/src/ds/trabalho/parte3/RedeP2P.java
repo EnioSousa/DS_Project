@@ -1,4 +1,4 @@
-package ds.trabalho.parte;
+package ds.trabalho.parte3;
 
 public class RedeP2P {
     public static void main(String[] argv) {

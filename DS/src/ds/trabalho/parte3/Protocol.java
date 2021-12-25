@@ -1,4 +1,4 @@
-package ds.trabalho.parte;
+package ds.trabalho.parte3;
 
 /**
  * Class is responsible for the definition of the procedures i.e. what to do if

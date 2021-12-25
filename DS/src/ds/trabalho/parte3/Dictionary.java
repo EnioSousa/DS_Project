@@ -1,4 +1,4 @@
-package ds.trabalho.parte;
+package ds.trabalho.parte3;
 
 import java.security.SecureRandom;
 import java.util.HashSet;
