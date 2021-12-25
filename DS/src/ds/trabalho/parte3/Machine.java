@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class handles the machine. It creates a shell, to read commands from the
@@ -43,6 +44,10 @@ public class Machine {
      * The ip table of other machines that we are connected
      */
     private List<InetAddress> ipTable;
+    /**
+     * Lock to access the ipTable and connections list. There is concurrency
+     */
+    private ReentrantReadWriteLock listAccessLock = new ReentrantReadWriteLock();
     /**
      * This object reference
      */
@@ -99,29 +104,36 @@ public class Machine {
 		    while (true) {
 			Socket socket = serverSocket.accept();
 
-			if (!haveConnection(socket.getInetAddress())) {
+			listAccessLock.writeLock().lock();
 
-			    Connection connection = new Connection(machine,
-				    socket, id);
+			try {
+			    if (!haveConnection(socket.getInetAddress())) {
 
-			    if (connection.isOpen()) {
-				System.out.println(
-					"[INFO] Server: Connection success: "
-						+ socket.getInetAddress() + ": "
-						+ socket.getPort());
-				addConnection(connection);
+				Connection connection = new Connection(machine,
+					socket, id);
+
+				if (connection.isOpen()) {
+				    System.out.println(
+					    "[INFO] Server: Connection success: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				    addConnection(connection);
+				} else {
+				    System.out.println(
+					    "[ERROR] Server: Conenction failed: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				}
 			    } else {
 				System.out.println(
-					"[ERROR] Server: Conenction failed: "
+					"[ERROR] Server: Connection failed: "
 						+ socket.getInetAddress() + ": "
 						+ socket.getPort());
 			    }
-			} else {
-			    System.out.println(
-				    "[ERROR] Server: Connection failed: "
-					    + socket.getInetAddress() + ": "
-					    + socket.getPort());
+			} finally {
+			    listAccessLock.writeLock().unlock();
 			}
+
 		    }
 		} catch (Exception e) {
 		    e.printStackTrace();
@@ -153,57 +165,58 @@ public class Machine {
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		if (haveConnection(ip)) {
-		    System.out.println("[INFO] Connection: Already connected: "
-			    + ip + ": " + port);
-		    return;
-		}
-
 		boolean tryAgain = true;
 
 		while (tryAgain) {
-		    if (haveConnection(ip)) {
-			System.out.println(
-				"[INFO] Connection: Already connected: " + ip
-					+ ": " + port);
-			return;
-		    }
+		    listAccessLock.writeLock().lock();
 
 		    try {
-			Socket socket = new Socket(ip, port);
-
-			Connection connection = new Connection(machine, socket,
-				id);
-
-			if (connection.isOpen()) {
+			if (haveConnection(ip)) {
 			    System.out.println(
-				    "[INFO] Connection: Connection success: "
-					    + socket.getInetAddress() + ": "
-					    + socket.getPort());
-			    addConnection(connection);
+				    "[INFO] Attempt: Already connected: " + ip
+					    + ": " + port);
 			    tryAgain = false;
 			} else {
-			    System.out.println(
-				    "[ERROR] Connection: Connection failed: "
-					    + socket.getInetAddress() + ": "
-					    + socket.getPort());
+			    try {
+				Socket socket = new Socket(ip, port);
+
+				Connection connection = new Connection(machine,
+					socket, id);
+
+				if (connection.isOpen()) {
+				    System.out.println(
+					    "[INFO] Attempt: Connection success: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				    addConnection(connection);
+				    tryAgain = false;
+				} else {
+				    System.out.println(
+					    "[ERROR] Attempt: Connection failed: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				}
+
+			    } catch (ConnectException e) {
+				try {
+				    Thread.sleep(3000);
+				    System.out.println("[INFO] Attempt: Retry: "
+					    + ip + ": " + port);
+				} catch (InterruptedException e1) {
+				    System.err.println(
+					    "[ERROR] Attempt: Sleep interrupted:"
+						    + e1);
+				}
+			    } catch (Exception e) {
+				e.printStackTrace();
+				tryAgain = false;
+				System.out.println("[ERROR] Attempt: FAIL: "
+					+ ip + ": " + port);
+			    }
 			}
 
-		    } catch (ConnectException e) {
-			try {
-			    Thread.sleep(3000);
-			    System.out.println("[INFO] Connectionn: Retry: "
-				    + ip + ": " + port);
-			} catch (InterruptedException e1) {
-			    System.err.println(
-				    "[ERROR] Connection: Sleep interrupted:"
-					    + e1);
-			}
-		    } catch (Exception e) {
-			e.printStackTrace();
-			tryAgain = false;
-			System.out.println("[ERROR] Connection: FAIL: " + ip
-				+ ": " + port);
+		    } finally {
+			listAccessLock.writeLock().unlock();
 		    }
 		}
 	    }
@@ -219,7 +232,7 @@ public class Machine {
      */
     public boolean haveConnection(InetAddress ip) {
 	for (InetAddress iteIp : getIpTable()) {
-	    if (iteIp.getAddress().equals(ip.getAddress()))
+	    if (iteIp.getHostAddress().equals(ip.getHostAddress()))
 		return true;
 	}
 
