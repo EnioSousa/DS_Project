@@ -3,13 +3,8 @@ package ds.trabalho.parte3;
 public class RedeP2P {
     public static void main(String[] argv) {
 	Integer id = Integer.parseInt(argv[findInArray(argv, "--id") + 1]);
-	Integer port = Integer.parseInt(argv[findInArray(argv, "--listenPort") + 1]);
-
-	if (argv.length < 2) {
-	    System.out.println(
-		    "Usage: RedeP2P <machine number> <listening port>");
-	    return;
-	}
+	Integer port = Integer
+		.parseInt(argv[findInArray(argv, "--portListen") + 1]);
 
 	Machine machine = new Machine(id, port);
     }

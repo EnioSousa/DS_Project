@@ -26,6 +26,7 @@ public class Protocol {
     static final String CMD_PULL = "pull";
     static final String CMD_PUSH_PULL = "pushpull";
     static final String CMD_SHOW_DIC = "dic";
+    static final String CMD_HELP = "help";
 
     static final String GOODBYE = "GOODBYE";
     static final String ACK_GOODBYE = "ACK_GOODBYE";
@@ -53,7 +54,7 @@ public class Protocol {
 	}
 
 	String arr[] = message.split(":");
-	System.out.println("[INFO] Protocol: Got message: " + arr[0]);
+	System.out.println("[INFO] Protocol: Got message: " + arr[2]);
 
 	if (arr.length < 3)
 	    System.out.println("[ERROR] Protocol: Wrong format: " + message);
@@ -198,6 +199,11 @@ public class Protocol {
 	    Dictionary.showDic();
 	    return;
 
+	case CMD_HELP:
+	    System.out.printf("[INFO] Protocol: Help: %s: %s: %s: %s: %s: %s\n",
+		    CMD_SHOW_IP_TABLE, CMD_PULL, CMD_PULL, CMD_PUSH_PULL,
+		    CMD_SHOW_DIC);
+	    break;
 	default:
 	    System.out.println("[ERROR] Protocol: Unkown command: " + command);
 	}
