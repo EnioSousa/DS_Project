@@ -27,17 +27,26 @@ tr5:
 	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ip l116 --port 5000 --listenPort 5000
 
 dic1:
-	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 1 --listenPort 5000
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 1 --listenPort 5000
 dic2:
-	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 2 --listenPort 5000
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 2 --listenPort 5000
 dic3:
-	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 3 --listenPort 5000
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 3 --listenPort 5000
 dic4:
-	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 4 --listenPort 5000
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 4 --listenPort 5000
 dic5:
-	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 5 --listenPort 5000
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 5 --listenPort 5000
 dic6:
-	cd $(BIN); java $(PACKAGE)3/RedeP2P --id 6 --listenPort 5000
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 6 --listenPort 5000
+
+rotm1:
+	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l117,l118,l119
+rotm2:
+	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l116,l118,l119
+rotm3:
+	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l116,l117,l119
+rotm4:
+	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l116,l117,l118
 
 checkDir:
 	mkdir -p $(BIN)
