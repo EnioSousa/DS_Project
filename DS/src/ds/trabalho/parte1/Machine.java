@@ -203,6 +203,7 @@ public class Machine {
 			}
 		    } catch (ConnectException e) {
 			try {
+			    System.out.println(e);
 			    Thread.sleep(3000);
 			    System.out.println("[INFO] Connectionn: Retry: "
 				    + ip + ": " + port);
