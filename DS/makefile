@@ -42,11 +42,11 @@ dic6:
 rotm1:
 	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l117,l118,l119
 rotm2:
-	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l116,l118,l119
+	cd $(BIN); $(PACKAGE)3/ROTM --id 2 --listenPort 5000 --ip l116,l118,l119
 rotm3:
-	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l116,l117,l119
+	cd $(BIN); $(PACKAGE)3/ROTM --id 3 --listenPort 5000 --ip l116,l117,l119
 rotm4:
-	cd $(BIN); $(PACKAGE)3/ROTM --id 1 --listenPort 5000 --ip l116,l117,l118
+	cd $(BIN); $(PACKAGE)3/ROTM --id 4 --listenPort 5000 --ip l116,l117,l118
 
 checkDir:
 	mkdir -p $(BIN)
