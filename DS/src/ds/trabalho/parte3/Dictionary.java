@@ -66,13 +66,11 @@ public class Dictionary {
 		    lock.writeLock().lock();
 
 		    try {
-			while (dic != null) {
-			    do {
-				str = randomWord(rnd.nextInt(5) + 5);
-			    } while (dic.contains(str));
+			do {
+			    str = randomWord(rnd.nextInt(5) + 5);
+			} while (dic.contains(str));
 
-			    dic.add(str);
-			}
+			dic.add(str);
 		    } finally {
 			lock.writeLock().unlock();
 		    }
