@@ -27,10 +27,13 @@ public class ReadChannel {
 	thread = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
+		System.out.println("passou1");
 		while (canContinue()) {
 		    try {
+			System.out.println("passou2");
 			String str = in.readLine();
 
+			System.out.println("passou3");
 			if (str == null) {
 			    connection.close();
 			} else {

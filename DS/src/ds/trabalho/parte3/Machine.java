@@ -126,9 +126,8 @@ public class Machine {
 				}
 			    } else {
 				System.out.println(
-					"[ERROR] Server: Connection failed: "
-						+ socket.getInetAddress() + ": "
-						+ socket.getPort());
+					"[ERROR] Server: Already connected: "
+						+ socket.getInetAddress());
 			    }
 			} finally {
 			    listAccessLock.writeLock().unlock();
@@ -261,6 +260,8 @@ public class Machine {
     public void addConnection(Connection connection) {
 	if (connections.add(connection)) {
 	    ipTable.add(connection.getAddress());
+	    Protocol.sendMessage(connection, Protocol.MSG_HELLO,
+		    String.valueOf(id));
 	}
     }
 

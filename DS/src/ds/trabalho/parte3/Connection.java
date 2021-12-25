@@ -69,9 +69,6 @@ public class Connection {
 	    write = null;
 	    System.out.println(e);
 	}
-
-	Protocol.sendMessage(this, Protocol.MSG_HELLO,
-		String.valueOf(getMyMachineId()));
     }
 
     /**
