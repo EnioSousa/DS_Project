@@ -31,6 +31,11 @@ public class Protocol {
     static final String STATE = "state()";
 
     /**
+     * The Current machine
+     */
+    static Machine curMachine;
+
+    /**
      * Process a message received from another machine
      * 
      * @param connection The connection that received the message
@@ -115,7 +120,7 @@ public class Protocol {
      * @param machine Our machine
      * @param command The command we received from the shell
      */
-    static void processCommand(Machine machine, String command) {
+    static void processCommand(String command) {
 	if (command == null) {
 	    System.out.println("[ERROR] command is null");
 	    return;
@@ -134,13 +139,22 @@ public class Protocol {
 	    break;
 
 	case STATE:
-	    machine.getMachineState();
+	    curMachine.getMachineState();
 	    break;
 
 	default:
 	    System.out.println("[ERROR] unkown command");
 	    break;
 	}
+    }
+
+    /**
+     * Set the current machine that has this protocol associated
+     * 
+     * @param machine The machine object that will use this protocol
+     */
+    public static void setCurMachine(Machine machine) {
+	Protocol.curMachine = machine;
     }
 
 }

@@ -1,26 +1,19 @@
 package ds.trabalho.parte1;
 
-import java.net.InetAddress;
-
 public class TokenRing {
     public static void main(String[] argv) throws Exception {
-	String ip = argv[findInArray(argv, "--ip") + 1];
-	Integer port = Integer.parseInt(argv[findInArray(argv, "--port") + 1]);
-	Integer listenPort = Integer
-		.parseInt(argv[findInArray(argv, "--listenPort") + 1]);
-	Integer id = Integer.parseInt(argv[findInArray(argv, "--id") + 1]);
+	ArgParse argParse = new ArgParse(argv);
 
-	Machine machine = new Machine(id, listenPort);
+	Machine machine = new Machine(argParse.getId(), argParse.getPort());
 
-	machine.attemptConnection(InetAddress.getByName(ip), port);
-    }
+	if (argParse.getIpSet() != null) {
+	    System.out.println("[STDOUT] Auto: Build network:");
 
-    public static Integer findInArray(String[] argv, String str) {
-	for (int i = 0; i < argv.length; i++) {
-	    if (argv[i].equals(str))
-		return i;
+	    if (argParse.getId() != argParse.getIpSet().length) {
+		machine.register(argParse.getIp(argParse.getId() + 1));
+	    } else {
+		machine.register(argParse.getIp(1));
+	    }
 	}
-
-	return -1;
     }
 }

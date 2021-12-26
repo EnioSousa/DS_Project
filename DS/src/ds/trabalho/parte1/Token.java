@@ -57,7 +57,7 @@ public class Token {
 		Protocol.sendMessage(connection, Protocol.TOKEN,
 			String.valueOf(tokenValue + 1));
 
-		System.out.println("[INFO] Token: pass token");
+		System.out.println("[STDOUT] Token: pass token");
 		tokenOwn = false;
 	    }
 	} finally {
@@ -76,7 +76,7 @@ public class Token {
 	try {
 	    tokenOwn = true;
 	    tokenValue = value;
-	    System.out.println("[INFO] Token: get token with value: "
+	    System.out.println("[STDOUT] Token: get token with value: "
 		    + String.valueOf(value));
 	} finally {
 	    lock.writeLock().unlock();
@@ -91,7 +91,7 @@ public class Token {
 
 	try {
 	    tokenLock = true;
-	    System.out.println("[INFO] Token: lock token:");
+	    System.out.println("[STDOUT] Token: lock token:");
 	} finally {
 	    lock.writeLock().unlock();
 	}
@@ -105,7 +105,7 @@ public class Token {
 
 	try {
 	    tokenLock = false;
-	    System.out.println("[INFO] Token: unlock token");
+	    System.out.println("[STDOUT] Token: unlock token");
 	} finally {
 	    lock.writeLock().unlock();
 	}
