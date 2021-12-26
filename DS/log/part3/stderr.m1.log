@@ -1,8 +1,0 @@
-[INFO] Server: Start listening on port: 5000
-[STDOUT]: Shell: Started: 
-[ERRO] Machine: Could not find host address: l117: 5000
-[ERRO] Machine: Could not find host address: l118: 5000
-[ERRO] Machine: Could not find host address: l119: 5000
-[STDOUT]: Shell: Closed: 
-[INFO] Protocol: Sending message: GOODBYE
-[INFO] Chat output: Stopped:
