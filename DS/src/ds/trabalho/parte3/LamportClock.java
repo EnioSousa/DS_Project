@@ -24,4 +24,17 @@ public class LamportClock {
     static Integer tick() {
 	return tick(-1);
     }
+
+    static Integer getTime() {
+	Integer temp = null;
+	lock.readLock().lock();
+
+	try {
+	    temp = time;
+	} finally {
+	    lock.readLock().unlock();
+	}
+
+	return temp;
+    }
 }
