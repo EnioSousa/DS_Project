@@ -112,7 +112,7 @@ public class Machine {
 			    for (int i = 0; i < 3 && !treeSet.isEmpty(); i++) {
 				ChatMessage chatMessage = treeSet.first();
 
-				System.out.println("[CHAT] From:"
+				System.out.println("[STDOUT] From:"
 					+ chatMessage.getMachineId()
 					+ ":Contents:"
 					+ chatMessage.getContent());
@@ -258,8 +258,9 @@ public class Machine {
 
 		    try {
 			Thread.sleep(3000);
-			System.out.println(
-				"[INFO] Attempt: Retry: " + ip + ": " + port);
+			if (tryAgain)
+			    System.out.println("[INFO] Attempt: Retry: " + ip
+				    + ": " + port);
 		    } catch (InterruptedException e1) {
 			System.err.println(
 				"[ERROR] Attempt: Sleep interrupted:" + e1);
@@ -462,6 +463,10 @@ public class Machine {
 	} finally {
 	    treeSetAccessLock.writeLock().unlock();
 	}
+    }
+
+    void broadCastTest(String msg) {
+	Protocol.sendMessage(null, Protocol.MSG_BROADCAST, msg);
     }
 
     /**

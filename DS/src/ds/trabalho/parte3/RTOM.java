@@ -1,5 +1,7 @@
 package ds.trabalho.parte3;
 
+import java.util.concurrent.TimeUnit;
+
 public class RTOM {
     public static void main(String[] argv) {
 	Integer id = Integer.parseInt(argv[findInArray(argv, "--id") + 1]);
@@ -11,6 +13,17 @@ public class RTOM {
 
 	for (String str : ip) {
 	    machine.register(str);
+	}
+
+	if (findInArray(argv, "--test") > 0) {
+	    try {
+		TimeUnit.SECONDS.sleep(5);
+	    } catch (InterruptedException e) {
+	    }
+
+	    for (int i = 0; i < 15; i++) {
+		machine.broadCastTest(String.valueOf(i));
+	    }
 	}
     }
 
