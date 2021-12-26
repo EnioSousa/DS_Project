@@ -52,7 +52,7 @@ tr4Test:
 	cd $(BIN); java $(PACKAGE)1/TokenRing --id 4 --ipSet $(PART_1_MACHINES)  \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m4.log  2> ../$(LOG)part2/stderr.m4.log
 tr5Test:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ipSet $(PART_1_MACHINES)  
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ipSet $(PART_1_MACHINES)  \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m5.log  2> ../$(LOG)part2/stderr.m5.log
 	
 
