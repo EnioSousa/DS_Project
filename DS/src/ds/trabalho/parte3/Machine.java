@@ -86,14 +86,14 @@ public class Machine {
 	    public void run() {
 		Scanner in = new Scanner(System.in);
 
-		System.out.println("[INFO]: Shell: Started: ");
+		System.out.println("[STDOUT]: Shell: Started: ");
 
 		while (in.hasNext()) {
 		    Protocol.proccessCommand(in.nextLine());
 		}
 
 		in.close();
-		System.out.println("[INFO]: Shell: Closed: ");
+		System.out.println("[STDOUT]: Shell: Closed: ");
 
 		Protocol.sendMessage(null, Protocol.GOODBYE, null);
 	    }
