@@ -1,6 +1,6 @@
-SRC := ./src/
-BIN := ./bin/
-LOG := ./log/
+SRC := src/
+BIN := bin/
+LOG := log/
 
 PART_3_MACHINES := l116,l117,l118,l119
 
