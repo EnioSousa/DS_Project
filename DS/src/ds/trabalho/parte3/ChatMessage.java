@@ -1,8 +1,6 @@
 package ds.trabalho.parte3;
 
-import java.util.Comparator;
-
-public class ChatMessage implements Comparator<ChatMessage> {
+public class ChatMessage implements Comparable<ChatMessage> {
     int timeStamp;
     int machineId;
     String content;
@@ -46,11 +44,9 @@ public class ChatMessage implements Comparator<ChatMessage> {
     }
 
     @Override
-    public int compare(ChatMessage o1, ChatMessage o2) {
-	return o1.getTimeStamp() == (o2.getTimeStamp())
-		? o1.getMachineId() - o2.getMachineId()
-		: o1.getTimeStamp() - o2.getTimeStamp();
-
+    public int compareTo(ChatMessage o) {
+	return timeStamp == o.getTimeStamp() ? machineId - o.getMachineId()
+		: timeStamp - o.getTimeStamp();
     }
 
 }
