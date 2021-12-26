@@ -17,7 +17,7 @@ compile: checkDir
 	mkdir -p $(BIN) $(LOG)
 	for num in $(PARTS); do \
 		echo $(PACKAGE)$$num; \
-		mkdir -p ../$(LOG)part$$num; \
+		mkdir -p $(LOG)part$$num; \
 		javac -d $(BIN) $(SRC)$(PACKAGE)$$num/*; \
 	done
 
