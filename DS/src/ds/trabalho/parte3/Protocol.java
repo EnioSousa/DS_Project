@@ -72,7 +72,7 @@ public class Protocol {
 	    break;
 
 	case MSG_BROADCAST:
-	    curMachine.deliver(new ChatMessage(arr[5], arr[1], arr[3]));
+	    curMachine.deliver(getChatMessage(message));
 	    connection.setTime(Integer.parseInt(arr[5]));
 	    LamportClock.tick(Integer.parseInt(arr[5]));
 	    Protocol.sendMessage(null, MSG_BLEATS, null);
@@ -117,6 +117,7 @@ public class Protocol {
 	    break;
 
 	case MSG_BROADCAST:
+	    curMachine.deliver(getChatMessage(string));
 	case MSG_BLEATS:
 	    for (Connection con : curMachine.getConnections()) {
 		con.send(string, false);
@@ -140,6 +141,12 @@ public class Protocol {
 	    break;
 	}
 
+    }
+
+    private static ChatMessage getChatMessage(String message) {
+	String arr[] = message.split(":");
+
+	return new ChatMessage(arr[5], arr[1], arr[3]);
     }
 
     /**
