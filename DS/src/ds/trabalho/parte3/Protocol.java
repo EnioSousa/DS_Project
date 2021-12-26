@@ -55,12 +55,13 @@ public class Protocol {
 	}
 
 	String arr[] = message.split(":");
-	System.out.println("[INFO] Protocol: Got message: " + arr[2]);
 
 	if (arr.length < 6) {
 	    System.out.println("[ERROR] Protocol: Wrong format: " + message);
 	    return;
 	}
+
+	System.out.println("[INFO] Protocol: Got message: " + arr[2]);
 
 	switch (arr[2]) {
 	case MSG_HELLO:
