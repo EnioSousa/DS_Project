@@ -24,35 +24,35 @@ compile: checkDir
 	done
 
 tr1:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 1 --ipSet $(PART_1_MACHINES) \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 1 --ipSet $(PART_1_MACHINES) \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m1.log
 tr2:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 2 --ipSet $(PART_1_MACHINES) \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 2 --ipSet $(PART_1_MACHINES) \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m2.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m2.log
 tr3:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 3 --ipSet $(PART_1_MACHINES) \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 3 --ipSet $(PART_1_MACHINES) \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m3.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m3.log
 tr4:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 4 --ipSet $(PART_1_MACHINES) \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 4 --ipSet $(PART_1_MACHINES) \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m4.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m4.log
 tr5:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ipSet $(PART_1_MACHINES) \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ipSet $(PART_1_MACHINES) \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m5.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m5.log
 
 tr1Test:
-	cd $(BIN); java $(PACKAGE)1/TokenRing  --id 1 --ipSet $(PART_1_MACHINES) \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing  --id 1 --ipSet $(PART_1_MACHINES) \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
 tr2Test:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 2 --ipSet $(PART_1_MACHINES)  \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 2 --ipSet $(PART_1_MACHINES)  \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m2.log  2> ../$(LOG)part2/stderr.m2.log
 tr3Test:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 3 --ipSet $(PART_1_MACHINES)  \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 3 --ipSet $(PART_1_MACHINES)  \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m3.log  2> ../$(LOG)part2/stderr.m3.log
 tr4Test:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 4 --ipSet $(PART_1_MACHINES)  \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 4 --ipSet $(PART_1_MACHINES)  \
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m4.log  2> ../$(LOG)part2/stderr.m4.log
 tr5Test:
-	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ipSet $(PART_1_MACHINES)  \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ipSet $(PART_1_MACHINES)  
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m5.log  2> ../$(LOG)part2/stderr.m5.log
 	
 
