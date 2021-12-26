@@ -1,5 +1,6 @@
 package ds.trabalho.parte3;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class RTOM {
@@ -16,12 +17,18 @@ public class RTOM {
 	}
 
 	if (findInArray(argv, "--test") > 0) {
+	    Random random = new Random();
+
 	    try {
 		TimeUnit.SECONDS.sleep(5);
 	    } catch (InterruptedException e) {
 	    }
 
 	    for (int i = 0; i < 15; i++) {
+		try {
+		    TimeUnit.MILLISECONDS.sleep(random.nextInt(2500));
+		} catch (InterruptedException e) {
+		}
 		machine.broadCastTest(String.valueOf(i));
 	    }
 	}
