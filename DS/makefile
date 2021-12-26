@@ -40,7 +40,7 @@ tr5:
 	--listenPort $(PORT)| tee ../$(LOG)part2/stdout.m5.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m5.log
 
 tr1Test:
-	cd $(BIN); java $(PACKAGE)1/TokenRing  \ 
+	cd $(BIN); java $(PACKAGE)1/TokenRing  --id 1 --ipSet $(PART_1_MACHINES) \ 
 	 --listenPort $(PORT)| tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
 tr2Test:
 	cd $(BIN); java $(PACKAGE)1/TokenRing --id 2 --ipSet $(PART_1_MACHINES)  \ 
