@@ -375,7 +375,7 @@ public class Machine {
     public void getMachineState() {
 	showCurrentIpTable();
 
-	Integer[] arr = new Integer[4];
+	int[] arr = new int[4];
 
 	for (Connection connection : getConnections()) {
 	    int i = connection.getOtherMachineId() - 1;
@@ -384,7 +384,10 @@ public class Machine {
 
 	arr[id - 1] = LamportClock.getTime();
 
-	System.out.println(arr);
+	for (int i = 0; i < 4; i++) {
+	    System.out.print(arr[i] + " ");
+	}
+	System.out.println();
     }
 
     /**
