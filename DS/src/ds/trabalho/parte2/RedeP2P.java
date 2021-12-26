@@ -2,20 +2,30 @@ package ds.trabalho.parte2;
 
 public class RedeP2P {
     public static void main(String[] argv) {
-	Integer id = Integer.parseInt(argv[findInArray(argv, "--id") + 1]);
-	Integer port = Integer
-		.parseInt(argv[findInArray(argv, "--listenPort") + 1]);
+	ArgParse argParse = new ArgParse(argv);
 
-	Machine machine = new Machine(id, port);
-    }
+	Machine machine = new Machine(argParse.getId(), argParse.getPort());
 
-    public static Integer findInArray(String[] argv, String str) {
-	for (int i = 0; i < argv.length; i++) {
-	    if (argv[i].equals(str))
-		return i;
+	if (argParse.getIpSet() != null) {
+	    System.out.println("[STDOUT] Auto: Build network:");
+
+	    switch (argParse.getId()) {
+	    case 2:
+		machine.register(argParse.getIp(1));
+		machine.register(argParse.getIp(3));
+		machine.register(argParse.getIp(4));
+		break;
+
+	    case 4:
+		machine.register(argParse.getIp(5));
+		machine.register(argParse.getIp(6));
+		break;
+
+	    default:
+		break;
+	    }
+
 	}
-
-	return -1;
     }
 
 }

@@ -2,6 +2,7 @@ SRC := src/
 BIN := bin/
 LOG := log/
 
+PART_2_MACHINES := l116,l117,l118,l120
 PART_3_MACHINES := l116,l117,l118,l119
 
 PORT := 5000
@@ -33,17 +34,43 @@ tr5:
 	cd $(BIN); java $(PACKAGE)1/TokenRing --id 5 --ip l116 --port $(PORT) --listenPort $(PORT)
 
 dic1:
-	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 1 --listenPort $(PORT)
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 1 --listenPort $(PORT)  \
+	 | tee ../$(LOG)part2/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m1.log
 dic2:
-	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 2 --listenPort $(PORT)
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 2 --listenPort $(PORT)  \
+	 | tee ../$(LOG)part2/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m1.log
 dic3:
-	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 3 --listenPort $(PORT)
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 3 --listenPort $(PORT)  \
+	 | tee ../$(LOG)part2/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m1.log
 dic4:
-	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 4 --listenPort $(PORT)
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 4 --listenPort $(PORT)  \
+	 | tee ../$(LOG)part2/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m1.log
 dic5:
-	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 5 --listenPort $(PORT)
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 5 --listenPort $(PORT)  \
+	 | tee ../$(LOG)part2/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m1.log
 dic6:
-	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 6 --listenPort $(PORT)
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 6 --listenPort $(PORT)  \
+	 | tee ../$(LOG)part2/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part2/stderr.m1.log
+
+
+dic1Test:
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 1 --listenPort $(PORT) --ipSet $(PART_2_MACHINES) \
+	 | tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
+dic2Test:
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 2 --listenPort $(PORT) --ipSet $(PART_2_MACHINES) \
+	 | tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
+dic3Test:
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 3 --listenPort $(PORT) --ipSet $(PART_2_MACHINES) \
+	 | tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
+dic4Test:
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 4 --listenPort $(PORT) --ipSet $(PART_2_MACHINES) \
+	 | tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
+dic5Test:
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 5 --listenPort $(PORT) --ipSet $(PART_2_MACHINES) \
+	 | tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
+dic6Test:
+	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 6 --listenPort $(PORT) --ipSet $(PART_2_MACHINES) \
+	 | tee ../$(LOG)part2/stdout.m1.log  2> ../$(LOG)part2/stderr.m1.log
 
 # Scripts for part 3 of assignment
 rtom1:
