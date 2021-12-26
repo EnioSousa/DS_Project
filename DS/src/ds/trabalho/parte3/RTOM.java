@@ -6,7 +6,7 @@ public class RTOM {
 
 	Machine machine = new Machine(argParse.getId(), argParse.getPort());
 
-	for (int i = 1; i <= 4; i++) {
+	for (int i = 1; i <= 1; i++) {
 	    if (i != argParse.getId()) {
 		machine.register(argParse.getIp(i));
 	    }

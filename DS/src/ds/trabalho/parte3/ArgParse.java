@@ -9,6 +9,8 @@ public class ArgParse {
     String[] options = { "--id", "--ipSet", "--listenPort" };
 
     public ArgParse(String[] argv) {
+	this.argv = argv;
+
 	if (checkArgs()) {
 	    setValues();
 	} else {
