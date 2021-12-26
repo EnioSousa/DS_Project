@@ -48,30 +48,30 @@ dic6:
 # Scripts for part 3 of assignment
 rtom1:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 1 --listenPort $(PORT) --ipSet $(PART_3_MACHINES) \
-	 1> tee ../$(LOG)part3/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m1.log
+	 | tee ../$(LOG)part3/stdout.m1.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m1.log
 rtom2:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 2 --listenPort $(PORT) --ipSet $(PART_3_MACHINES)  \
-	 1> tee ../$(LOG)part3/stdout.m2.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m2.log
+	 | tee ../$(LOG)part3/stdout.m2.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m2.log
 rtom3:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 3 --listenPort $(PORT) --ipSet $(PART_3_MACHINES)  \
-	 1> tee ../$(LOG)part3/stdout.m3.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m3.log
+	 | tee ../$(LOG)part3/stdout.m3.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m3.log
 rtom4:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 4 --listenPort $(PORT) --ipSet $(PART_3_MACHINES) \
-	 1> tee ../$(LOG)part3/stdout.m4.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m4.log
+	 | tee ../$(LOG)part3/stdout.m4.log | egrep \\[STDOUT\\] 2> ../$(LOG)part3/stderr.m4.log
 
 
 rtom1Test:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 1 --listenPort $(PORT) --ipSet $(PART_3_MACHINES) \
-	 1> tee ../$(LOG)part3/stdout.m1.log 2> tee ../$(LOG)part3/stderr.m1.log
+	 | tee ../$(LOG)part3/stdout.m1.log 2> tee ../$(LOG)part3/stderr.m1.log
 rtom2Test:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 2 --listenPort $(PORT) --ipSet $(PART_3_MACHINES)  \
-	 1> tee ../$(LOG)part3/stdout.m2.log 2> tee ../$(LOG)part3/stderr.m2.log
+	 | tee ../$(LOG)part3/stdout.m2.log 2> tee ../$(LOG)part3/stderr.m2.log
 rtom3Test:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 3 --listenPort $(PORT) --ipSet $(PART_3_MACHINES)  \
-	 1> tee ../$(LOG)part3/stdout.m3.log 2> tee ../$(LOG)part3/stderr.m3.log
+	 | tee ../$(LOG)part3/stdout.m3.log 2> tee ../$(LOG)part3/stderr.m3.log
 rtom4Test:
 	cd $(BIN); java $(PACKAGE)3/RTOM --id 4 --listenPort $(PORT) --ipSet $(PART_3_MACHINES) \
-	 1> tee ../$(LOG)part3/stdout.m4.log 2> tee ../$(LOG)part3/stderr.m4.log 
+	 | tee ../$(LOG)part3/stdout.m4.log 2> tee ../$(LOG)part3/stderr.m4.log 
 
 checkDir:
 	mkdir -p $(BIN)
