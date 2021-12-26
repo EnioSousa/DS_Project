@@ -1,5 +1,4 @@
 package ds.trabalho.parte3;
-
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -381,7 +380,6 @@ public class Machine {
 	    int i = connection.getOtherMachineId() - 1;
 	    arr[i] = connection.getTime();
 	}
-
 	arr[id - 1] = LamportClock.getTime();
 
 	for (int i = 0; i < 4; i++) {
