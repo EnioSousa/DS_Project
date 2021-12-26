@@ -40,13 +40,27 @@ dic6:
 	cd $(BIN); java $(PACKAGE)2/RedeP2P --id 6 --listenPort 5000
 
 rtom1:
-	cd $(BIN); java $(PACKAGE)3/RTOM --id 1 --listenPort 5000 --ip l117,l118,l119
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 1 --listenPort 5000 --ip l117,l118,l119 | egrep \\[STDOUT\\]
 rtom2:
-	cd $(BIN); java $(PACKAGE)3/RTOM --id 2 --listenPort 5000 --ip l116,l118,l119
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 2 --listenPort 5000 --ip l116,l118,l119 | egrep \\[STDOUT\\]
 rtom3:
-	cd $(BIN); java $(PACKAGE)3/RTOM --id 3 --listenPort 5000 --ip l116,l117,l119
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 3 --listenPort 5000 --ip l116,l117,l119 | egrep \\[STDOUT\\]
 rtom4:
-	cd $(BIN); java $(PACKAGE)3/RTOM --id 4 --listenPort 5000 --ip l116,l117,l118
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 4 --listenPort 5000 --ip l116,l117,l118 | egrep \\[STDOUT\\]
+
+rtom1t:
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 1 --listenPort 5000 --ip l117,l118,l119 \
+	--test | egrep \\[STDOUT\\]
+rtom2t:
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 2 --listenPort 5000 --ip l116,l118,l119 \
+	--test | egrep \\[STDOUT\\]
+rtom3t:
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 3 --listenPort 5000 --ip l116,l117,l119 \
+	--test | egrep \\[STDOUT\\]
+rtom4t:
+	cd $(BIN); java $(PACKAGE)3/RTOM --id 4 --listenPort 5000 --ip l116,l117,l118 \
+	--test | egrep \\[STDOUT\\]
+	
 
 checkDir:
 	mkdir -p $(BIN)
