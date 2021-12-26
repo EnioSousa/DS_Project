@@ -357,7 +357,7 @@ public class Machine {
 	try {
 	    register(InetAddress.getByName(ip), port);
 	} catch (UnknownHostException e) {
-	    System.out.println("[ERRO] Machine: Could not find host address: "
+	    System.out.println("[ERROR] Machine: Could not find host address: "
 		    + ip + ": " + port);
 	}
     }

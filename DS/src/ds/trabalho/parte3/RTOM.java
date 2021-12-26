@@ -8,7 +8,6 @@ public class RTOM {
 
 	for (int i = 1; i <= 4; i++) {
 	    if (i != argParse.getId()) {
-		System.out.println(argParse.getIp(i));
 		machine.register(argParse.getIp(i));
 	    }
 	}
