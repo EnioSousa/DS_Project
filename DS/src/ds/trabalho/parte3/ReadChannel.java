@@ -31,6 +31,7 @@ public class ReadChannel {
 		while (canContinue()) {
 		    try {
 			System.out.println("passou2");
+
 			String str = in.readLine();
 
 			System.out.println("passou3");

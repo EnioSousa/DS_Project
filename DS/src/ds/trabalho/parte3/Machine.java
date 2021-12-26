@@ -128,6 +128,7 @@ public class Machine {
 				System.out.println(
 					"[ERROR] Server: Already connected: "
 						+ socket.getInetAddress());
+				socket.close();
 			    }
 			} finally {
 			    listAccessLock.writeLock().unlock();
@@ -197,15 +198,7 @@ public class Machine {
 				}
 
 			    } catch (ConnectException e) {
-				try {
-				    Thread.sleep(3000);
-				    System.out.println("[INFO] Attempt: Retry: "
-					    + ip + ": " + port);
-				} catch (InterruptedException e1) {
-				    System.err.println(
-					    "[ERROR] Attempt: Sleep interrupted:"
-						    + e1);
-				}
+				tryAgain = true;
 			    } catch (Exception e) {
 				e.printStackTrace();
 				tryAgain = false;
@@ -216,6 +209,15 @@ public class Machine {
 
 		    } finally {
 			listAccessLock.writeLock().unlock();
+		    }
+
+		    try {
+			Thread.sleep(3000);
+			System.out.println(
+				"[INFO] Attempt: Retry: " + ip + ": " + port);
+		    } catch (InterruptedException e1) {
+			System.err.println(
+				"[ERROR] Attempt: Sleep interrupted:" + e1);
 		    }
 		}
 	    }
