@@ -236,6 +236,8 @@ public class Machine {
      * @return true if ip is on ip table, otherwise false
      */
     public boolean haveConnection(InetAddress ip) {
+	System.out.println(connections.size());
+	System.out.println(ipTable.size());
 	for (InetAddress iteIp : getIpTable()) {
 	    System.out.println(iteIp.getHostAddress());
 	    System.out.println(ip.getHostAddress());
