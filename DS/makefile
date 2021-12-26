@@ -4,7 +4,7 @@ LOG := log/
 
 PART_3_MACHINES := l116,l117,l118,l119
 
-PORT := $(PORT)
+PORT := 5000
 
 PACKAGE := ds/trabalho/parte
 PARTS := 1 2 3
