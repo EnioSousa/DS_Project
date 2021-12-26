@@ -69,8 +69,6 @@ public class Connection {
 	    write = null;
 	    System.out.println(e);
 	}
-
-	write.write("asd\n", false);
     }
 
     /**
