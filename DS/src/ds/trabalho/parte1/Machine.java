@@ -288,6 +288,8 @@ public class Machine {
     public void addConnection(Connection connection) {
 	if (connections.add(connection)) {
 	    ipTable.add(connection.getAddress());
+	    Protocol.sendMessage(connection, Protocol.HELLO,
+		    String.valueOf(id));
 	}
     }
 
