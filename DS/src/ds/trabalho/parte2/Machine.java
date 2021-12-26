@@ -203,7 +203,6 @@ public class Machine {
 			    } catch (ConnectException e) {
 				tryAgain = true;
 			    } catch (Exception e) {
-				e.printStackTrace();
 				tryAgain = false;
 				System.out.println("[ERROR] Attempt: FAIL: "
 					+ ip + ": " + port);
@@ -236,11 +235,7 @@ public class Machine {
      * @return true if ip is on ip table, otherwise false
      */
     public boolean haveConnection(InetAddress ip) {
-	System.out.println(connections.size());
-	System.out.println(ipTable.size());
 	for (InetAddress iteIp : getIpTable()) {
-	    System.out.println(iteIp.getHostAddress());
-	    System.out.println(ip.getHostAddress());
 	    if (iteIp.getHostAddress().equals(ip.getHostAddress()))
 		return true;
 	}
