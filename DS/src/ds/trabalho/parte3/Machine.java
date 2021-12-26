@@ -1,4 +1,5 @@
 package ds.trabalho.parte3;
+
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -8,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -31,6 +33,7 @@ public class Machine {
      * Thread that is responsible for reading commands from the user
      */
     private Thread shell;
+    private Thread timer;
     /**
      * Thread responsible for accepting connections
      */
@@ -51,6 +54,14 @@ public class Machine {
      * This object reference
      */
     private Machine machine;
+    /**
+     * Lock to access the map
+     */
+    private ReentrantReadWriteLock treeSetAccessLock = new ReentrantReadWriteLock();
+    /**
+     * Messages data base
+     */
+    private TreeSet<ChatMessage> treeSet = new TreeSet<>();
 
     /**
      * Constructor will create a new listing thread, a shell thread and initiate
@@ -88,6 +99,41 @@ public class Machine {
 	    }
 	});
 	shell.start();
+
+	// Create a timer for pulling messages
+	timer = new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		while (shell.isAlive()) {
+		    treeSetAccessLock.writeLock().lock();
+
+		    try {
+			if (!treeSet.isEmpty()) {
+			    for (int i = 0; i < 3 && !treeSet.isEmpty(); i++) {
+				ChatMessage chatMessage = treeSet.first();
+
+				System.out.println("[CHAT] From:"
+					+ chatMessage.getMachineId()
+					+ ":Contents:"
+					+ chatMessage.getContent());
+				treeSet.remove(chatMessage);
+			    }
+			}
+		    } finally {
+			treeSetAccessLock.writeLock().unlock();
+		    }
+
+		    try {
+			Thread.sleep(2500);
+		    } catch (Exception e) {
+			System.out.println(
+				"[ERROR] Chat output: Sleeps was interrupted:");
+		    }
+		}
+		System.out.println("[INFO] Chat output: Stopped:");
+	    }
+	});
+	timer.start();
 
 	// Create a new thread that will listen to connection requests
 	listen = new Thread(new Runnable() {
@@ -406,6 +452,16 @@ public class Machine {
      */
     public List<InetAddress> getIpTable() {
 	return new ArrayList<InetAddress>(ipTable);
+    }
+
+    public void deliver(ChatMessage chatMessage) {
+	treeSetAccessLock.writeLock().lock();
+
+	try {
+	    treeSet.add(chatMessage);
+	} finally {
+	    treeSetAccessLock.writeLock().unlock();
+	}
     }
 
     /**

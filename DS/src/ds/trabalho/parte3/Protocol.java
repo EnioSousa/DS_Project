@@ -72,7 +72,7 @@ public class Protocol {
 	    break;
 
 	case MSG_BROADCAST:
-	    System.out.println(arr[3]);
+	    curMachine.deliver(new ChatMessage(arr[5], arr[1], arr[3]));
 	    connection.setTime(Integer.parseInt(arr[5]));
 	    LamportClock.tick(Integer.parseInt(arr[5]));
 	    Protocol.sendMessage(null, MSG_BLEATS, null);
