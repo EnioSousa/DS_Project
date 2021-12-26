@@ -79,7 +79,7 @@ public class Machine {
 	    public void run() {
 		Scanner in = new Scanner(System.in);
 
-		System.out.println("[STDOUT: Shell: Started: ");
+		System.out.println("[STDOUT]: Shell: Started: ");
 
 		while (in.hasNext()) {
 		    Protocol.proccessCommand(in.nextLine());
