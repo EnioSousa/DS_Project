@@ -38,6 +38,7 @@ public class ReadChannel {
 			}
 		    } catch (Exception e) {
 			e.printStackTrace();
+			connection.close();
 		    }
 		}
 	    }
