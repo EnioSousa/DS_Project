@@ -125,6 +125,7 @@ public class Machine {
 
 		    try {
 			Thread.sleep(2500);
+			Protocol.sendMessage(null, Protocol.MSG_BLEATS, null);
 		    } catch (Exception e) {
 			System.out.println(
 				"[ERROR] Chat output: Sleeps was interrupted:");

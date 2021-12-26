@@ -96,7 +96,9 @@ public class Dictionary {
 	lock.writeLock().lock();
 
 	try {
-	    dic.add(str);
+	    if (dic.add(str)) {
+		System.out.println("[STDOUT] Dic: Got new word: " + str);
+	    }
 	} finally {
 	    lock.writeLock().unlock();
 	}
@@ -144,14 +146,15 @@ public class Dictionary {
     public static void showDic() {
 	lock.readLock().lock();
 
-	System.out.println("[INFO] Dic: Dic start: Size: " + dic.size());
+	System.out.println("[STDOUT] Dic: Dic start: ");
 
 	try {
 	    for (String str : dic) {
-		System.out.println(str);
+		System.out.println("[STDOUT] Dic: Dic entry:" + str);
 	    }
 	} finally {
-	    System.out.println("[INFO] Dic: Dic end: Size: " + dic.size());
+	    System.out.println("[STDOUT] Dic: Dic end:");
+	    System.out.println("[STDOUT] Dic: Dic size:" + dic.size());
 	    lock.readLock().unlock();
 	}
     }

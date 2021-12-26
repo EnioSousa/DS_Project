@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class handles the machine. It creates a shell, to read commands from the
@@ -45,6 +46,10 @@ public class Machine {
      */
     private List<InetAddress> ipTable;
     /**
+     * Lock to access the ipTable and connections list. There is concurrency
+     */
+    private ReentrantReadWriteLock listAccessLock = new ReentrantReadWriteLock();
+    /**
      * The dictionary
      */
     Dictionary dic;
@@ -74,14 +79,14 @@ public class Machine {
 	    public void run() {
 		Scanner in = new Scanner(System.in);
 
-		System.out.println("[INFO]: Shell: Started: ");
+		System.out.println("[STDOUT: Shell: Started: ");
 
 		while (in.hasNext()) {
 		    Protocol.proccessCommand(in.nextLine());
 		}
 
 		in.close();
-		System.out.println("[INFO]: Shell: Closed: ");
+		System.out.println("[STDOUT]: Shell: Closed: ");
 
 		stopMachine();
 	    }
@@ -102,29 +107,36 @@ public class Machine {
 		    while (true) {
 			Socket socket = serverSocket.accept();
 
-			if (!haveConnection(socket.getInetAddress())) {
+			listAccessLock.writeLock().lock();
 
-			    Connection connection = new Connection(machine,
-				    socket, id);
+			try {
+			    if (!haveConnection(socket.getInetAddress())) {
 
-			    if (connection.isOpen()) {
-				System.out.println(
-					"[INFO] Server: Connection success: "
-						+ socket.getInetAddress() + ": "
-						+ socket.getPort());
-				addConnection(connection);
+				Connection connection = new Connection(machine,
+					socket, id);
+
+				if (connection.isOpen()) {
+				    System.out.println(
+					    "[INFO] Server: Connection success: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				    addConnection(connection);
+				} else {
+				    System.out.println(
+					    "[ERROR] Server: Conenction failed: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				}
 			    } else {
 				System.out.println(
-					"[ERROR] Server: Conenction failed: "
-						+ socket.getInetAddress() + ": "
-						+ socket.getPort());
+					"[ERROR] Server: Already connected: "
+						+ socket.getInetAddress());
+				socket.close();
 			    }
-			} else {
-			    System.out.println(
-				    "[ERROR] Server: Connection failed: "
-					    + socket.getInetAddress() + ": "
-					    + socket.getPort());
+			} finally {
+			    listAccessLock.writeLock().unlock();
 			}
+
 		    }
 		} catch (Exception e) {
 		    e.printStackTrace();
@@ -156,57 +168,60 @@ public class Machine {
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		if (haveConnection(ip)) {
-		    System.out.println("[INFO] Connection: Already connected: "
-			    + ip + ": " + port);
-		    return;
-		}
-
 		boolean tryAgain = true;
 
 		while (tryAgain) {
-		    if (haveConnection(ip)) {
-			System.out.println(
-				"[INFO] Connection: Already connected: " + ip
-					+ ": " + port);
-			return;
+		    listAccessLock.writeLock().lock();
+
+		    try {
+			if (haveConnection(ip)) {
+			    System.out.println(
+				    "[INFO] Attempt: Already connected: " + ip
+					    + ": " + port);
+			    tryAgain = false;
+			} else {
+			    try {
+				Socket socket = new Socket(ip, port);
+
+				Connection connection = new Connection(machine,
+					socket, id);
+
+				if (connection.isOpen()) {
+				    System.out.println(
+					    "[INFO] Attempt: Connection success: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				    addConnection(connection);
+				    tryAgain = false;
+				} else {
+				    System.out.println(
+					    "[ERROR] Attempt: Connection failed: "
+						    + socket.getInetAddress()
+						    + ": " + socket.getPort());
+				}
+
+			    } catch (ConnectException e) {
+				tryAgain = true;
+			    } catch (Exception e) {
+				e.printStackTrace();
+				tryAgain = false;
+				System.out.println("[ERROR] Attempt: FAIL: "
+					+ ip + ": " + port);
+			    }
+			}
+
+		    } finally {
+			listAccessLock.writeLock().unlock();
 		    }
 
 		    try {
-			Socket socket = new Socket(ip, port);
-
-			Connection connection = new Connection(machine, socket,
-				id);
-
-			if (connection.isOpen()) {
-			    System.out.println(
-				    "[INFO] Connection: Connection success: "
-					    + socket.getInetAddress() + ": "
-					    + socket.getPort());
-			    addConnection(connection);
-			    tryAgain = false;
-			} else {
-			    System.out.println(
-				    "[ERROR] Connection: Connection failed: "
-					    + socket.getInetAddress() + ": "
-					    + socket.getPort());
-			}
-
-		    } catch (ConnectException e) {
-			try {
-			    Thread.sleep(3000);
-			    System.out.println("[INFO] Connectionn: Retry: "
-				    + ip + ": " + port);
-			} catch (InterruptedException e1) {
-			    System.err.println(
-				    "[ERROR] Connection: Sleep interrupted:"
-					    + e1);
-			}
-		    } catch (Exception e) {
-			e.printStackTrace();
-			tryAgain = false;
-			System.out.println("[ERROR] Connection: FAIL: " + ip
-				+ ": " + port);
+			Thread.sleep(3000);
+			if (tryAgain)
+			    System.out.println("[INFO] Attempt: Retry: " + ip
+				    + ": " + port);
+		    } catch (InterruptedException e1) {
+			System.err.println(
+				"[ERROR] Attempt: Sleep interrupted:" + e1);
 		    }
 		}
 	    }
@@ -222,7 +237,7 @@ public class Machine {
      */
     public boolean haveConnection(InetAddress ip) {
 	for (InetAddress iteIp : getIpTable()) {
-	    if (iteIp.getAddress().equals(ip.getAddress()))
+	    if (iteIp.getHostAddress().equals(ip.getHostAddress()))
 		return true;
 	}
 
@@ -233,14 +248,14 @@ public class Machine {
      * Print our current ip table
      */
     public void showCurrentIpTable() {
-	System.out.println("[INFO] Machine: Ip Table start:");
+	System.out.println("[STDOUT] Machine: Ip Table start:");
 	int i = 0;
 	for (InetAddress ip : ipTable) {
-	    System.out.println("[INFO] Machine: Table Entry: " + i
+	    System.out.println("[STDOUT] Machine: Table Entry: " + i
 		    + ": Table Value: " + ip);
 	    i++;
 	}
-	System.out.println("[INFO] Machine: Ip table end:");
+	System.out.println("[STDOUT] Machine: Ip table end:");
     }
 
     /**
@@ -251,6 +266,8 @@ public class Machine {
     public void addConnection(Connection connection) {
 	if (connections.add(connection)) {
 	    ipTable.add(connection.getAddress());
+	    Protocol.sendMessage(connection, Protocol.MSG_HELLO,
+		    String.valueOf(id));
 	}
     }
 

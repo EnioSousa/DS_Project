@@ -1,0 +1,2 @@
+Error: Could not find or load main class ds.trabalho.parte3.RTOM
+Caused by: java.lang.ClassNotFoundException: ds.trabalho.parte3.RTOM

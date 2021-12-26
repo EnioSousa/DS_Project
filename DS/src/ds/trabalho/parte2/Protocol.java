@@ -29,7 +29,6 @@ public class Protocol {
     static final String CMD_HELP = "help";
 
     static final String GOODBYE = "GOODBYE";
-    static final String ACK_GOODBYE = "ACK_GOODBYE";
 
     /**
      * /** Identifier
@@ -79,11 +78,6 @@ public class Protocol {
 	    return;
 
 	case GOODBYE:
-	    connection.send(ACK_GOODBYE, true);
-	    connection.close();
-	    break;
-
-	case ACK_GOODBYE:
 	    connection.close();
 	    break;
 
@@ -109,6 +103,7 @@ public class Protocol {
 	case MSG_HELLO:
 	case MSG_TABLE_ENTRY:
 	case MSG_REQUEST_TABLE:
+	case GOODBYE:
 	    connection.send(buildMessage(connection, msgCode, msgValue), false);
 	    return;
 
@@ -126,8 +121,8 @@ public class Protocol {
      */
     public static String buildMessage(Connection connection, String msgCode,
 	    String msgValue) {
-	return FROM + ":" + String.valueOf(connection.getMyMachineId()) + ":"
-		+ msgCode + (msgValue == null ? "" : ":" + msgValue);
+	return FROM + ":" + curMachine.getId() + ":" + msgCode
+		+ (msgValue == null ? ":NONE" : ":" + msgValue);
     }
 
     /**
@@ -136,7 +131,7 @@ public class Protocol {
      * @param command the command the user want us to execute
      */
     public static void proccessCommand(String command) {
-	String[] arr = command.split("\\(|\\)|,");
+	String[] arr = command.split("\\(|\\)|\\(\\)");
 
 	System.out.println("[INFO] Protocol: Got command: " + arr[0]);
 
