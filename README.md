@@ -46,7 +46,7 @@ To execute the first part, the programmer will need to enter into 5 different no
 Once the ip set is known, the user needs to change the variable PART_1_MACHINES in the makefile with the ip set to be used. This variable is an array and the order is important, for the correct execution of the program. 
 The first ip in the array should be the first machine, and so on...
 
-Example where l115 is the first machine, l116 is the second machine etc...
+Example where l116 is the first machine, l117 is the second machine etc...
 
 ```
 PART_1_MACHINES := l115,l116,l117,l118,l119
@@ -61,7 +61,7 @@ Once the ip set is done, the user has two options:
 Finally if not to user sastifaction, its always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part1/TokenRing ```and see the usage i.e. the required options.
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
 
-You may want to filter the output by using ``` egrep ``` there are three different types of information available
+You may also want to filter the output by using ``` egrep ``` there are three different types of information available
 + basic info ```[INFO]```
 + erro info ```[ERROR]```
 + expected output ```[STDOUT]```
@@ -76,7 +76,7 @@ Much like the last section, the user needs to create an ip set with 6 different 
 
 Example where l115 is the first machine, l116 is the second machine etc...
 ```
-PART_2_MACHINES := l116,l117,l118,l119,l120,l115
+PART_2_MACHINES := l115,l116,l117,l118,l119,l120
 ```
 
 Once the ip set is done, the user has two options:
@@ -91,6 +91,11 @@ make dic<machineNumber>
 Finally if not to user satisfaction, it's always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part2/RedeP2P``` and see the usage i.e. the required options needed
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
 
+You may also want to filter the output by using ``` egrep ``` there are three different types of information available
++ basic info ```[INFO]```
++ erro info ```[ERROR]```
++ expected output ```[STDOUT]```
++ 
 ## Part3
 Much like the previous sections, the user needs to create an ip set with 4 different ips and change the variable PART_3_MACHINES in the makefile
 
@@ -106,5 +111,10 @@ make rtom<machineNumber>
 
 Finally if not to user satisfaction, it's always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part2/RTOM``` and see the usage i.e. the required options needed
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
+
+You may also want to filter the output by using ``` egrep ``` there are three different types of information available
++ basic info ```[INFO]```
++ erro info ```[ERROR]```
++ expected output ```[STDOUT]```
 
 
