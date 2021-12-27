@@ -54,9 +54,14 @@ PART_1_MACHINES := l115,l116,l117,l118,l119
 
 Once the ip set is done, the user has two options:
 + run the verbose mode, where important information, but not relevant to what was asked, are shown by executing on each corresponding node 
-``` make tr<machineNumber>Test ```
+``` 
+make tr<machineNumber>Test 
+```
+
 + run with the expected output, where only what was asked is shown, by executing on each corresponding node 
-```mate tr<machineNumber>```
+```
+mate tr<machineNumber>
+```
 
 Finally if not to user sastifaction, its always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part1/TokenRing ```and see the usage i.e. the required options.
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
