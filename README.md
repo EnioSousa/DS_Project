@@ -109,7 +109,7 @@ make rtom<machineNumber>Test
 make rtom<machineNumber>
 ```
 
-Finally if not to user satisfaction, it's always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part2/RTOM``` and see the usage i.e. the required options needed
+Finally if not to user satisfaction, it's always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part3/RTOM``` and see the usage i.e. the required options needed
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
 
 You may also want to filter the output by using ``` egrep ``` there are three different types of information available
