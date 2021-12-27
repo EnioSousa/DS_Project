@@ -60,8 +60,12 @@ make tr<machineNumber>Test
 
 + run with the expected output, where only what was asked is shown, by executing on each corresponding node 
 ```
-mate tr<machineNumber>
+make tr<machineNumber>
 ```
+Make file run example: 
+
++ In node 1, with ip l116, run ```make tr1Test``` 
++ In node 2, with ip l117, run ```make tr2Test```
 
 Finally if not to user sastifaction, its always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part1/TokenRing ```and see the usage i.e. the required options.
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
@@ -93,6 +97,9 @@ make dic<machineNumber>Test
 ```
 make dic<machineNumber>
 ```
+
+Example: In node 1, with ip l116, run ```make dic1Tes```, in node 2, with ip l117, run ```make dic2Test``` etc..
+
 Finally if not to user satisfaction, it's always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part2/RedeP2P``` and see the usage i.e. the required options needed
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
 
