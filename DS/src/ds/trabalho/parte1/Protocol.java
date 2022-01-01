@@ -20,15 +20,17 @@ public class Protocol {
     /*
      * Lock token
      */
-    static final String UNLOCK = "unlock()";
+    static final String UNLOCK = "unlock";
     /*
      * Unlock token
      */
-    static final String LOCK = "lock()";
+    static final String LOCK = "lock";
     /**
      * Command patter to print the machine state
      */
-    static final String STATE = "state()";
+    static final String STATE = "state";
+
+    static final String REGISTER = "register";
 
     /**
      * The Current machine
@@ -125,8 +127,7 @@ public class Protocol {
 	    System.out.println("[ERROR] command is null");
 	    return;
 	}
-
-	String[] arr = command.split(":");
+	String[] arr = command.split("\\(|\\)|\\(\\)");
 	System.out.println("[INFO] Protocol: Got command: " + arr[0]);
 
 	switch (arr[0]) {
@@ -141,6 +142,10 @@ public class Protocol {
 	case STATE:
 	    curMachine.getMachineState();
 	    break;
+
+	case REGISTER:
+	    curMachine.register(arr[1]);
+	    return;
 
 	default:
 	    System.out.println("[ERROR] unkown command");

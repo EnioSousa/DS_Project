@@ -171,7 +171,7 @@ public class Protocol {
      * @param command the command the user want us to execute
      */
     public static void proccessCommand(String command) {
-	String[] arr = command.split("\\(\\)");
+	String[] arr = command.split("\\(|\\)|\\(\\)");
 
 	switch (arr[0]) {
 	case CMD_STATE:
@@ -179,8 +179,6 @@ public class Protocol {
 	    break;
 
 	case CMD_REGISTER:
-	    arr = command.split("\\(|\\)|,");
-
 	    curMachine.register(arr[1]);
 	    break;
 
