@@ -15,7 +15,9 @@ public class ArgParse {
 	    setValues();
 	} else {
 	    System.out.println(
-		    "[ERROR] Usage: --id <id> --ipSet <ip,...,ip> --listenPort <port>");
+		    "[ERROR] Usage: --id <id> --ipSet <ip,...,ip> --listenPort <port>:"
+			    + "Usage: --id <id> --listenPort <port>:");
+	    System.exit(1);
 	}
     }
 

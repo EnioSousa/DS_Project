@@ -1,3 +1,5 @@
+# Note i realise this is not the proper way of doing things, i should have done a 
+# Proper logging using the java api, instead of using egrep commands
 SRC := src/
 BIN := bin/
 LOG := log/

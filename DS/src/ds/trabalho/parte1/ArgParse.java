@@ -6,7 +6,7 @@ public class ArgParse {
     String[] ipSet;
 
     String[] argv;
-    String[] options = { "--id", "--ipSet", "--listenPort" };
+    String[] options = { "--id", "--listenPort" };
 
     public ArgParse(String[] argv) {
 	this.argv = argv;
@@ -15,8 +15,9 @@ public class ArgParse {
 	    setValues();
 	} else {
 	    System.out.println(
-		    "[ERROR] Usage: --id <id> --ipSet <ip,...,ip> --listenPort <port>");
-	    return;
+		    "[ERROR] Usage: --id <id> --ipSet <ip,...,ip> --listenPort <port>:"
+			    + "Usage: --id <id> --listenPort <port>:");
+	    System.exit(1);
 	}
     }
 
