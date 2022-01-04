@@ -37,7 +37,7 @@ public class ReadChannel {
 			    Protocol.proccessMessage(connection, str);
 			}
 		    } catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("[ERROR] Socket forcebly closed");
 			connection.close();
 		    }
 		}
