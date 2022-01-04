@@ -29,9 +29,14 @@ public class Protocol {
      * Command patter to print the machine state
      */
     static final String STATE = "state";
-
+    /**
+     * Connect to another node
+     */
     static final String REGISTER = "register";
-
+    /**
+     * Command to ask for help
+     */
+    static final String HELP = "Help";
     /**
      * The Current machine
      */
@@ -147,6 +152,18 @@ public class Protocol {
 	    curMachine.register(arr[1]);
 	    return;
 
+	case HELP:
+	    StringBuilder strBuild = new StringBuilder();
+
+	    strBuild.append(
+		    "Help me pleasee!:\n command example:explanation\n");
+	    strBuild.append("register(<machine name>):Connect to machine\n");
+	    strBuild.append("unlock():Unlock token");
+	    strBuild.append("lock():lock token");
+	    strBuild.append("state():See machine state");
+
+	    System.out.println("[STDOUT]:" + strBuild.toString());
+	    break;
 	default:
 	    System.out.println("[ERROR] unkown command");
 	    break;

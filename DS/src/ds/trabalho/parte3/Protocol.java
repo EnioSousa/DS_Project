@@ -20,6 +20,7 @@ public class Protocol {
      */
     static final String CMD_REGISTER = "register";
     static final String CMD_STATE = "state";
+    static final String CMD_HELP = "help";
 
     /**
      * 
@@ -180,6 +181,11 @@ public class Protocol {
 
 	case CMD_REGISTER:
 	    curMachine.register(arr[1]);
+	    break;
+
+	case CMD_HELP:
+	    System.out.printf(
+		    "[STDOUT] Protocol: register(<machine name>): state():");
 	    break;
 
 	default:
