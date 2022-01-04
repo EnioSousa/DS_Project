@@ -155,14 +155,14 @@ public class Protocol {
 	case HELP:
 	    StringBuilder strBuild = new StringBuilder();
 
-	    strBuild.append("[STDOUT] Protocol: Help me info\n");
 	    strBuild.append(
-		    "[STDOUT] Protocol: register(<machine name>):Connect to machine\n");
-	    strBuild.append("[STDOUT] Protocol: unlock():Unlock token");
-	    strBuild.append("[STDOUT] Protocol: lock():lock token");
-	    strBuild.append("[STDOUT] Protocol: state():See machine state");
+		    "[STDOUT] Protocol: help: register(<machine name>):Connect to machine\n");
+	    strBuild.append("[STDOUT] Protocol: help: unlock():Unlock token\n");
+	    strBuild.append("[STDOUT] Protocol: help: lock():lock token\n");
+	    strBuild.append(
+		    "[STDOUT] Protocol: help: state():See machine state\n");
 
-	    System.out.println("[STDOUT]:" + strBuild.toString());
+	    System.out.println(strBuild.toString());
 	    break;
 	default:
 	    System.out.println("[ERROR] unkown command");
