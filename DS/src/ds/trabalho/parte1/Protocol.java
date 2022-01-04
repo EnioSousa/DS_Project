@@ -36,7 +36,7 @@ public class Protocol {
     /**
      * Command to ask for help
      */
-    static final String HELP = "Help";
+    static final String HELP = "help";
     /**
      * The Current machine
      */
