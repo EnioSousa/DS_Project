@@ -176,16 +176,17 @@ public class Protocol {
 
 	switch (arr[0]) {
 	case CMD_STATE:
+	    System.out.println("[INFO] Protocol: Got state command: ");
 	    curMachine.getMachineState();
 	    break;
 
 	case CMD_REGISTER:
+	    System.out.println("[INFO] Protocol: Got register command: ");
 	    curMachine.register(arr[1]);
 	    break;
 
 	case CMD_HELP:
-	    System.out.printf(
-		    "[STDOUT] Protocol: register(<machine name>): state():");
+	    System.out.println("[STDOUT] Protocol: register: help: state");
 	    break;
 
 	default:

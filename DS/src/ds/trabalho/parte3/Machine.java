@@ -430,10 +430,13 @@ public class Machine {
 	}
 	arr[id - 1] = LamportClock.getTime();
 
+	StringBuilder strBuilder = new StringBuilder("[STDOUT]: Clock State: ");
+
 	for (int i = 0; i < 4; i++) {
-	    System.out.print(arr[i] + " ");
+	    strBuilder.append(arr[i] + ":");
 	}
-	System.out.println();
+
+	System.out.println(strBuilder.toString());
     }
 
     /**
