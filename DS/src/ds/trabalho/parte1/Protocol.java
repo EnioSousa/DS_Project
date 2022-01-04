@@ -155,12 +155,12 @@ public class Protocol {
 	case HELP:
 	    StringBuilder strBuild = new StringBuilder();
 
+	    strBuild.append("[STDOUT] Protocol: Help me info\n");
 	    strBuild.append(
-		    "Help me pleasee!:\n command example:explanation\n");
-	    strBuild.append("register(<machine name>):Connect to machine\n");
-	    strBuild.append("unlock():Unlock token");
-	    strBuild.append("lock():lock token");
-	    strBuild.append("state():See machine state");
+		    "[STDOUT] Protocol: register(<machine name>):Connect to machine\n");
+	    strBuild.append("[STDOUT] Protocol: unlock():Unlock token");
+	    strBuild.append("[STDOUT] Protocol: lock():lock token");
+	    strBuild.append("[STDOUT] Protocol: state():See machine state");
 
 	    System.out.println("[STDOUT]:" + strBuild.toString());
 	    break;
