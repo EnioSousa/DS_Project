@@ -40,7 +40,7 @@ public class RTOM {
 			machine.broadCastTest(
 				String.valueOf(System.currentTimeMillis()));
 			try {
-			    Thread.sleep(rnd.nextInt(500, 1250));
+			    Thread.sleep(rnd.nextInt(1000) + 250);
 			} catch (Exception e) {
 			    System.out.println("[ERROR] Auto: Sleep interrupt");
 			}
