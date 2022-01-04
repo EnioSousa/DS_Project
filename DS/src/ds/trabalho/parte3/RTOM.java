@@ -1,5 +1,7 @@
 package ds.trabalho.parte3;
 
+import java.util.Random;
+
 public class RTOM {
     public static void main(String[] argv) {
 	ArgParse argParse = new ArgParse(argv);
@@ -15,6 +17,40 @@ public class RTOM {
 		    machine.register(argParse.getIp(i));
 		}
 	    }
+
+	    System.out.println("[STDOUT] Auto: Test synchronisation");
+
+	    Thread thread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    Random rnd = new Random();
+
+		    while (machine.getIpTable().size() < 3) {
+			try {
+			    Thread.sleep(1000);
+			} catch (Exception e) {
+			    System.out.println("[ERROR] Auto: Sleep interrupt");
+			}
+		    }
+
+		    System.out.println("[STDOUT] Auto: Test Start");
+
+		    for (int i = 0; i < 15; i++) {
+
+			machine.broadCastTest(
+				String.valueOf(System.currentTimeMillis()));
+			try {
+			    Thread.sleep(rnd.nextInt(500, 1250));
+			} catch (Exception e) {
+			    System.out.println("[ERROR] Auto: Sleep interrupt");
+			}
+		    }
+
+		    System.out.println("[STDOUT] Auto: Test End");
+		}
+	    });
+
+	    thread.start();
 	}
 
     }
