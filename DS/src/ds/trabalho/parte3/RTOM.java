@@ -18,11 +18,11 @@ public class RTOM {
 		}
 	    }
 
-	    System.out.println("[STDOUT] Auto: Test synchronisation");
-
 	    Thread thread = new Thread(new Runnable() {
 		@Override
 		public void run() {
+		    System.out.println("[STDOUT] Auto: Test synchronisation");
+
 		    Random rnd = new Random();
 
 		    while (machine.getIpTable().size() < 3) {
@@ -45,8 +45,6 @@ public class RTOM {
 			    System.out.println("[ERROR] Auto: Sleep interrupt");
 			}
 		    }
-
-		    System.out.println("[STDOUT] Auto: Test End");
 		}
 	    });
 
