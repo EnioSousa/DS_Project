@@ -111,6 +111,7 @@ You may also want to filter the output by using ``` egrep ``` there are three di
 ## Part3
 Much like the previous sections, the user needs to create an ip set with 4 different ips and change the variable PART_3_MACHINES in the makefile
 
+
 Once the ip set is done, the user has two options:
 + run verbose mode, by executing on each corresponding node 
 ```
@@ -120,6 +121,7 @@ make rtom<machineNumber>Test
 ```
 make rtom<machineNumber>
 ```
+I assume that the person reading this tutorial is busy, so i made a test to prove synchronization. When an ip set is given, every node running this program will broadcast a message with its epoch time. Do not be mistaken, this program does not use timestamps to synchronize the chat message, but it's useful to see the order of the messages. Here is what I recommend. Run the program in normal mode, then compare the messages received.
 
 Finally if not to user satisfaction, it's always possible to run manually. Inside the bin folder, you can run ``` java ds.trabalho.part3/RTOM``` and see the usage i.e. the required options needed
 Once the program is running, a shell will start, and its possible to run the command register by typing ``` register(<machineName>) ``` to manually connect to another node
@@ -128,5 +130,4 @@ You may also want to filter the output by using ``` egrep ``` there are three di
 + basic info ```[INFO]```
 + erro info ```[ERROR]```
 + expected output ```[STDOUT]```
-
 
