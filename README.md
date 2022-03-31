@@ -1,5 +1,5 @@
 # Author
-Name: José Énio Gonçalves de Sousa
+Name: José Sousa
 
 # DS_Project
 
