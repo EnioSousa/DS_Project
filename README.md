@@ -3,8 +3,6 @@ Name: José Énio Gonçalves de Sousa
 
 Identification number: 201405702
 
-Email: up201405702@edu.fc.up.pt or eniofcup@hotmail.com
-
 # DS_Project
 
 The assignment is constituted by three different parts:
