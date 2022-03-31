@@ -1,8 +1,6 @@
 # Author
 Name: José Énio Gonçalves de Sousa
 
-Identification number: 201405702
-
 # DS_Project
 
 The assignment is constituted by three different parts:
